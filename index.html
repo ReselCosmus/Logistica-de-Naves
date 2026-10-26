@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logística de Naves</title>
+<style>
+  :root{
+    --fondo:#070b14; --panel:#0f172a; --borde:#1e3a5f;
+    --acento:#38bdf8; --texto:#e2e8f0; --suave:#94a3b8;
+    --ok:#34d399; --error:#f87171; --oro:#fbbf24;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at 20% 0%,#10203a 0%,#070b14 55%) fixed;
+    color:var(--texto); min-height:100vh;
+  }
+  .oculto{display:none !important}
+
+  /* ---------- PANTALLA DE ACCESO ---------- */
+  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .auth-card{
+    width:100%;max-width:400px;
+    background:linear-gradient(160deg,#0f1c33,#0a1220);
+    border:1px solid var(--borde);border-radius:16px;padding:28px;
+    box-shadow:0 0 40px rgba(56,189,248,.08),0 20px 50px rgba(0,0,0,.5);
+  }
+  .logo{font-size:1.35rem;letter-spacing:2px;color:var(--acento);text-align:center;font-weight:800}
+  .logo span{display:block;font-size:.7rem;letter-spacing:7px;color:var(--suave);margin-top:5px}
+  .sub{text-align:center;color:var(--suave);font-size:.82rem;margin:12px 0 20px}
+  .tabs{display:flex;gap:6px;background:#0a1424;padding:5px;border-radius:10px;margin-bottom:18px}
+  .tab{flex:1;background:none;border:0;color:var(--suave);padding:9px;border-radius:8px;
+       cursor:pointer;font-size:.82rem;font-weight:700;transition:.2s;font-family:inherit}
+  .tab.activo{background:linear-gradient(135deg,#1d4ed8,#0ea5e9);color:#fff}
+
+  .form{display:flex;flex-direction:column;gap:12px}
+  label{font-size:.78rem;color:var(--suave);display:flex;flex-direction:column;gap:6px;font-weight:700}
+  input,select,textarea{
+    background:#0a1424;border:1px solid var(--borde);color:var(--texto);
+    padding:10px 12px;border-radius:9px;font-size:.9rem;font-family:inherit;
+    outline:none;transition:.2s;width:100%;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--acento);box-shadow:0 0 0 3px rgba(56,189,248,.13)}
+  textarea{resize:vertical}
+
+  .btn{cursor:pointer;border:1px solid var(--borde);background:#132238;color:var(--texto);
+       padding:10px 16px;border-radius:9px;font-weight:700;font-size:.83rem;
+       transition:.2s;font-family:inherit}
+  .btn:hover{background:#1b3050;border-color:var(--acento)}
+  .btn.primario{background:linear-gradient(135deg,#1d4ed8,#0ea5e9);border:0;color:#fff}
+  .btn.primario:hover{filter:brightness(1.15)}
+  .btn.oro{background:linear-gradient(135deg,#b45309,#f59e0b);border:0;color:#1a1204}
+  .btn.oro:hover{filter:brightness(1.12)}
+  .btn.quitar{background:linear-gradient(135deg,#7f1d1d,#b91c1c);border:0;color:#fff}
+  .btn.quitar:hover{filter:brightness(1.15)}
+  .btn.mini{padding:7px 11px;font-size:.73rem}
+  .btn.peligro:hover{background:#7f1d1d;border-color:#ef4444}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  .msg{font-size:.79rem;min-height:1.1em;text-align:center}
+  .msg.ok{color:var(--ok)} .msg.error{color:var(--error)}
+
+  /* ---------- APLICACIÓN ---------- */
+  .topbar{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+    padding:14px 22px;background:rgba(10,18,32,.9);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--borde);position:sticky;top:0;z-index:20;
+  }
+  .topbar h2{font-size:1.02rem;letter-spacing:1px;color:var(--acento)}
+  .topbar-der{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .usuario{font-size:.78rem;color:var(--suave)}
+  .usuario b{color:var(--texto)}
+  .saldo{
+    font-size:.85rem;font-weight:800;color:#1a1204;
+    background:linear-gradient(135deg,#fbbf24,#f59e0b);
+    padding:6px 12px;border-radius:20px;letter-spacing:.3px;
+    box-shadow:0 0 16px rgba(251,191,36,.25);white-space:nowrap;
+  }
+  .badge-admin{
+    font-size:.72rem;font-weight:800;letter-spacing:.5px;color:#1a1204;
+    background:linear-gradient(135deg,#fbbf24,#f59e0b);
+    padding:5px 11px;border-radius:20px;
+  }
+
+  .contenedor{max-width:1250px;margin:0 auto;padding:24px 18px 80px;display:flex;flex-direction:column;gap:22px}
+  .panel{background:linear-gradient(160deg,#0d182b,#0a1220);border:1px solid var(--borde);border-radius:14px;padding:20px}
+  .panel h3{font-size:.93rem;margin-bottom:14px;color:#cbd5e1;letter-spacing:.5px}
+
+  .grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;align-items:end}
+  .grid-form .full{grid-column:1/-1}
+
+  .barra-catalogo{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .barra-catalogo h3{margin:0}
+  #buscador{max-width:380px}
+
+  .grid-naves{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px}
+  .nave{background:#0d1728;border:1px solid var(--borde);border-radius:14px;overflow:hidden;
+        display:flex;flex-direction:column;transition:.25s}
+  .nave:hover{transform:translateY(-4px);border-color:var(--acento);box-shadow:0 14px 32px rgba(0,0,0,.55)}
+  .nave-img{height:160px;background:#060b14;overflow:hidden}
+  .nave-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .nave-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .tag{align-self:flex-start;font-size:.63rem;letter-spacing:1px;text-transform:uppercase;
+       padding:3px 9px;border-radius:20px;background:rgba(56,189,248,.12);color:var(--acento);
+       border:1px solid rgba(56,189,248,.3);font-weight:800}
+  .nave-body h4{font-size:1rem;color:#f1f5f9;line-height:1.25}
+  .empresa{font-size:.74rem;color:var(--suave)}
+  .desc{font-size:.79rem;color:#a7b6c9;line-height:1.45;
+        display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .datos{display:flex;justify-content:space-between;gap:8px;align-items:center;
+         margin-top:auto;padding-top:9px;border-top:1px dashed #1c2f4a;font-size:.84rem}
+  .precio{color:var(--ok);font-weight:800}
+  .stock{color:var(--suave);font-size:.76rem}
+  .stock.agotado{color:var(--error);font-weight:800}
+  .nave-pie{display:flex;justify-content:space-between;align-items:center;gap:8px;
+            font-size:.69rem;color:#64748b;margin-top:2px}
+
+  .compra-row{display:flex;gap:8px;align-items:center;margin-top:10px}
+  .compra-row input{width:66px;padding:7px 8px;font-size:.8rem;text-align:center}
+  .compra-row .btn{flex:1}
+  .propio{font-size:.7rem;color:var(--acento);font-weight:700;margin-top:8px;text-align:center}
+
+  /* ---------- INVENTARIO ---------- */
+  .inv-grupo{margin-bottom:18px}
+  .inv-grupo:last-child{margin-bottom:0}
+  .inv-grupo h4{
+    font-size:.78rem;color:var(--acento);margin-bottom:10px;
+    letter-spacing:1.5px;text-transform:uppercase;font-weight:800;
+    display:flex;align-items:center;gap:8px;
+  }
+  .inv-grupo h4::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--borde),transparent)}
+  .inv-item{
+    display:flex;gap:12px;align-items:center;background:#0a1424;
+    border:1px solid var(--borde);border-radius:10px;padding:10px;margin-bottom:8px;flex-wrap:wrap;
+  }
+  .inv-item img{width:72px;height:52px;object-fit:cover;border-radius:6px;background:#060b14;flex-shrink:0}
+  .inv-info{flex:1;min-width:150px}
+  .inv-nombre{font-weight:700;font-size:.88rem}
+  .inv-empresa{font-size:.72rem;color:var(--suave)}
+  .inv-meta{font-size:.76rem;color:#9fb0c4;margin-top:4px}
+  .inv-meta b{color:var(--ok)}
+  .inv-acciones{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .inv-acciones input{width:66px;padding:7px 8px;font-size:.8rem;text-align:center}
+
+  .vacio{text-align:center;color:var(--suave);padding:34px 10px;font-size:.9rem}
+
+  /* ---------- PANEL ADMIN ---------- */
+  .admin-desc{font-size:.82rem;color:var(--suave);margin-bottom:14px;line-height:1.5}
+  .admin-desc b{color:var(--oro)}
+  .admin-resumen{
+    display:flex;gap:22px;flex-wrap:wrap;
+    background:#0a1424;border:1px solid var(--borde);
+    border-radius:10px;padding:14px 18px;margin-bottom:18px;
+    font-size:.85rem;
+  }
+  .admin-resumen b{color:var(--oro);font-weight:800}
+  .admin-resumen span{display:flex;align-items:center;gap:6px;color:#cbd5e1}
+
+  .usuario-item{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    background:#0a1424;border:1px solid var(--borde);
+    border-radius:10px;padding:12px 14px;margin-bottom:10px;
+    transition:.2s;
+  }
+  .usuario-item:hover{border-color:var(--acento)}
+  .usuario-info{flex:1;min-width:180px}
+  .usuario-nombre{font-weight:700;font-size:.92rem;color:#f1f5f9}
+  .usuario-meta{font-size:.72rem;color:var(--suave);margin-top:4px}
+  .usuario-saldo{
+    font-size:.85rem;font-weight:800;color:var(--oro);
+    padding:6px 12px;border-radius:20px;
+    background:rgba(251,191,36,.1);
+    border:1px solid rgba(251,191,36,.3);
+    white-space:nowrap;
+  }
+  .usuario-add{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .usuario-add input{width:92px;padding:7px 9px;font-size:.8rem;text-align:center}
+  .usuario-add .btn{padding:7px 9px;font-size:.73rem}
+
+  .usuario-inv{
+    padding:12px 14px;background:#071018;
+    border:1px solid #16273f;border-top:0;
+    border-radius:0 0 10px 10px;
+    margin-top:-4px;margin-bottom:10px;
+  }
+  .usuario-inv .inv-item{margin-bottom:6px;padding:8px}
+  .usuario-inv .inv-item:last-child{margin-bottom:0}
+  .usuario-inv .inv-item img{width:56px;height:42px}
+
+  .admin-catalogo-item{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;
+    background:#0a1424;border:1px solid var(--borde);
+    border-radius:10px;padding:12px 14px;margin-bottom:10px;
+  }
+  .admin-catalogo-item:hover{border-color:var(--acento)}
+  .admin-cat-info{flex:1;min-width:180px}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);
+    background:#0f172a;border:1px solid var(--acento);color:var(--texto);
+    padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:600;
+    box-shadow:0 10px 30px rgba(0,0,0,.6);opacity:0;pointer-events:none;
+    transition:.3s;z-index:100;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast.ok{border-color:var(--ok)}
+  .toast.error{border-color:var(--error)}
+</style>
+</head>
+<body>
+
+<!-- ==================== PANTALLA DE ACCESO ==================== -->
+<div id="pantallaAuth" class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="logo">🚀 LOGÍSTICA<span>DE NAVES</span></h1>
+    <p class="sub">Crea tu cuenta y entra al hangar</p>
+
+    <div class="tabs">
+      <button id="tabLogin" type="button" class="tab activo">Iniciar sesión</button>
+      <button id="tabRegistro" type="button" class="tab">Registrarse</button>
+    </div>
+
+    <form id="formLogin" class="form">
+      <label>Usuario
+        <input id="loginUsuario" type="text" autocomplete="username" required placeholder="tu usuario">
+      </label>
+      <label>Contraseña
+        <input id="loginClave" type="password" autocomplete="current-password" required placeholder="••••••">
+      </label>
+      <button class="btn primario" type="submit">Entrar</button>
+      <p id="msgLogin" class="msg"></p>
+    </form>
+
+    <form id="formRegistro" class="form oculto">
+      <label>Usuario
+        <input id="regUsuario" type="text" required maxlength="20" placeholder="mínimo 3 caracteres">
+      </label>
+      <label>Contraseña
+        <input id="regClave" type="password" required placeholder="mínimo 4 caracteres">
+      </label>
+      <label>Repetir contraseña
+        <input id="regClave2" type="password" required placeholder="repítela">
+      </label>
+      <button class="btn primario" type="submit">Crear cuenta</button>
+      <p id="msgRegistro" class="msg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== APLICACIÓN ==================== -->
+<div id="pantallaApp" class="oculto">
+  <header class="topbar">
+    <h2>🚀 LOGÍSTICA DE NAVES</h2>
+    <div class="topbar-der">
+      <span class="badge-admin oculto" id="badgeAdmin">👑 ADMINISTRADOR</span>
+      <span class="saldo" id="saldoUsuario">💰 0 cr</span>
+      <span class="usuario">👤 <b id="nombreUsuario"></b></span>
+      <button class="btn mini" id="btnExportar" type="button">⬇ Exportar .txt</button>
+      <button class="btn mini" id="btnImportar" type="button">⬆ Importar .txt</button>
+      <input type="file" id="inputArchivo" accept=".txt,text/plain" hidden>
+      <button class="btn mini peligro" id="btnSalir" type="button">Salir</button>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <!-- ================= PANEL ADMINISTRADOR ================= -->
+    <section id="seccionAdmin" class="oculto">
+      <div class="panel">
+        <h3>👑 Gestión de usuarios y créditos</h3>
+        <p class="admin-desc">
+          Añade o quita créditos a cualquier usuario. También puedes gestionar su inventario
+          pulsando <b>📦 Ver inventario</b> y eliminar naves concretas.
+        </p>
+        <div class="admin-resumen" id="adminResumen"></div>
+        <div id="listaUsuarios"></div>
+      </div>
+
+      <div class="panel">
+        <h3>🛰 Gestión del catálogo</h3>
+        <p class="admin-desc">
+          Reduce el stock de una nave en venta o elimínala por completo del catálogo.
+          Los inventarios de los usuarios que ya la compraron no se verán afectados.
+        </p>
+        <div id="listaCatalogoAdmin"></div>
+      </div>
+    </section>
+
+    <!-- ================= FORMULARIO AÑADIR NAVE ================= -->
+    <section id="seccionFormNave" class="panel">
+      <h3>➕ Añadir nave al catálogo</h3>
+      <form id="formNave" class="grid-form">
+        <label>Nombre de la nave *
+          <input id="naveNombre" type="text" required maxlength="60" placeholder="Ej: Halcón Estelar">
+        </label>
+
+        <label>Categoría *
+          <select id="naveCategoria" required>
+            <option value="">-- Selecciona --</option>
+            <option value="Caza">Caza</option>
+            <option value="Corbeta">Corbeta</option>
+            <option value="Fragata">Fragata</option>
+            <option value="Crucero ligero">Crucero ligero</option>
+            <option value="Crucero pesado">Crucero pesado</option>
+          </select>
+        </label>
+
+        <label>Precio (créditos) *
+          <input id="navePrecio" type="number" min="0" step="1" required placeholder="150000">
+        </label>
+
+        <label>Stock disponible *
+          <input id="naveStock" type="number" min="0" step="1" required placeholder="10">
+        </label>
+
+        <label>Empresa vendedora *
+          <input id="naveEmpresa" type="text" required maxlength="60" placeholder="Ej: Astilleros Orión">
+        </label>
+
+        <label>URL de la imagen *
+          <input id="naveImagen" type="text" required placeholder="https://... (link de Google Imágenes)">
+        </label>
+
+        <label class="full">Descripción *
+          <textarea id="naveDescripcion" rows="3" required maxlength="600"
+            placeholder="Blindaje, armamento, velocidad, motores..."></textarea>
+        </label>
+
+        <button class="btn primario full" type="submit">Publicar nave</button>
+        <p id="msgNave" class="msg full"></p>
+      </form>
+    </section>
+
+    <!-- ================= CATÁLOGO ================= -->
+    <section id="seccionCatalogo" class="panel">
+      <div class="barra-catalogo">
+        <h3>🛰 Catálogo de naves (<span id="contador">0</span>)</h3>
+        <input id="buscador" type="search" placeholder="🔍 Buscar por nombre, empresa o categoría...">
+      </div>
+      <div id="gridNaves" class="grid-naves"></div>
+      <p id="vacio" class="vacio oculto">Todavía no hay naves publicadas. ¡Añade la primera! 🚀</p>
+    </section>
+
+    <!-- ================= MI INVENTARIO ================= -->
+    <section id="seccionInventario" class="panel">
+      <h3>🎒 Mi inventario <span id="invContador" style="color:var(--suave);font-weight:400"></span></h3>
+      <div id="inventario"></div>
+      <p id="invVacio" class="vacio">No has comprado ninguna nave todavía. ¡Ve al catálogo y compra algo! 🛒</p>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================
+     "BASE DE DATOS" (exportable como archivo .txt)
+     - ln_usuarios : [{usuario, clave, dinero, inventario[], esAdmin, creado}]
+     - ln_naves    : [{id, nombre, categoria, precio, stock, ...}]
+
+     👑 ADMIN: usuario "Administrador" / contraseña "Overnegro777"
+        · Se crea/resetea automáticamente al arrancar.
+        · Puede añadir y quitar créditos, eliminar naves del
+          inventario de cualquier usuario, y reducir/eliminar
+          naves del catálogo.
+  ========================================================= */
+  const K_USUARIOS = 'ln_usuarios';
+  const K_NAVES    = 'ln_naves';
+  const K_SESION   = 'ln_sesion';
+
+  const ADMIN_USER     = 'Administrador';
+  const ADMIN_PASS     = 'Overnegro777';
+  const DINERO_INICIAL = 0;
+  const CATEGORIAS = ['Caza','Corbeta','Fragata','Crucero ligero','Crucero pesado'];
+
+  const $ = id => document.getElementById(id);
+
+  const leer = (clave, def) => {
+    try { const r = localStorage.getItem(clave); return r ? JSON.parse(r) : def; }
+    catch(e){ return def; }
+  };
+  const guardar = (clave, valor) => localStorage.setItem(clave, JSON.stringify(valor));
+  const fechaISO = () => new Date().toISOString();
+  const fmtNum = n => new Intl.NumberFormat('es-ES').format(Number(n) || 0);
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+
+  function hash(txt){
+    let h = 5381;
+    for (let i = 0; i < txt.length; i++) h = ((h * 33) ^ txt.charCodeAt(i)) >>> 0;
+    return h.toString(16);
+  }
+
+  const PLACEHOLDER = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240">' +
+    '<rect width="100%" height="100%" fill="#0b1526"/>' +
+    '<text x="50%" y="50%" fill="#38bdf8" font-size="18" font-family="sans-serif" ' +
+    'text-anchor="middle" dominant-baseline="middle">SIN IMAGEN</text></svg>'
+  );
+
+  let usuarioActual = null;
+  const invAbiertos = new Set(); // usuarios cuyo inventario está expandido en el panel admin
+
+  /* ---------------- UTILIDADES DE UI ---------------- */
+  function msg(el, texto, tipo){
+    el.textContent = texto || '';
+    el.className = 'msg' + (tipo ? ' ' + tipo : '');
+  }
+
+  let toastTimer = null;
+  function toast(texto, tipo){
+    const t = $('toast');
+    t.textContent = texto;
+    t.className = 'toast show' + (tipo ? ' ' + tipo : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = 'toast'; }, 3400);
+  }
+
+  function getUsuario(nombre){
+    return leer(K_USUARIOS, []).find(u => u.usuario === nombre) || null;
+  }
+
+  function esModoAdmin(){
+    return usuarioActual === ADMIN_USER;
+  }
+
+  /* ---------------- ADMIN: creación / reseteo ---------------- */
+  function asegurarAdmin(){
+    const usuarios = leer(K_USUARIOS, []);
+    let admin = usuarios.find(u => u.usuario === ADMIN_USER);
+
+    if (!admin){
+      admin = {
+        usuario: ADMIN_USER,
+        clave: hash(ADMIN_PASS),
+        dinero: 0,
+        inventario: [],
+        esAdmin: true,
+        creado: fechaISO()
+      };
+      usuarios.push(admin);
+    } else {
+      admin.clave = hash(ADMIN_PASS);
+      admin.esAdmin = true;
+      if (typeof admin.dinero !== 'number') admin.dinero = 0;
+      if (!Array.isArray(admin.inventario)) admin.inventario = [];
+    }
+    guardar(K_USUARIOS, usuarios);
+  }
+
+  /* ---------------- MIGRACIÓN ---------------- */
+  function migrarDatos(){
+    const usuarios = leer(K_USUARIOS, []);
+    let cambio = false;
+    usuarios.forEach(u => {
+      if (typeof u.dinero !== 'number'){ u.dinero = DINERO_INICIAL; cambio = true; }
+      if (!Array.isArray(u.inventario)){ u.inventario = []; cambio = true; }
+    });
+    if (cambio) guardar(K_USUARIOS, usuarios);
+  }
+
+  /* ---------------- PESTAÑAS LOGIN / REGISTRO ---------------- */
+  function mostrarTab(cual){
+    const esLogin = (cual === 'login');
+    $('tabLogin').classList.toggle('activo', esLogin);
+    $('tabRegistro').classList.toggle('activo', !esLogin);
+    $('formLogin').classList.toggle('oculto', !esLogin);
+    $('formRegistro').classList.toggle('oculto', esLogin);
+  }
+  $('tabLogin').addEventListener('click', () => mostrarTab('login'));
+  $('tabRegistro').addEventListener('click', () => mostrarTab('registro'));
+
+  /* ---------------- REGISTRO ---------------- */
+  $('formRegistro').addEventListener('submit', function(e){
+    e.preventDefault();
+    const u  = $('regUsuario').value.trim();
+    const c1 = $('regClave').value;
+    const c2 = $('regClave2').value;
+    const out = $('msgRegistro');
+
+    if (u.length < 3) return msg(out, 'El usuario debe tener al menos 3 caracteres.', 'error');
+    if (!/^[a-zA-Z0-9_.-]+$/.test(u))
+      return msg(out, 'Solo letras, números, punto, guion y guion bajo.', 'error');
+    if (u.toLowerCase() === ADMIN_USER.toLowerCase())
+      return msg(out, 'Ese nombre de usuario está reservado.', 'error');
+    if (c1.length < 4) return msg(out, 'La contraseña debe tener al menos 4 caracteres.', 'error');
+    if (c1 !== c2) return msg(out, 'Las contraseñas no coinciden.', 'error');
+
+    const usuarios = leer(K_USUARIOS, []);
+    if (usuarios.some(x => x.usuario.toLowerCase() === u.toLowerCase()))
+      return msg(out, 'Ese usuario ya existe, elige otro.', 'error');
+
+    usuarios.push({
+      usuario: u,
+      clave: hash(c1),
+      dinero: DINERO_INICIAL,
+      inventario: [],
+      creado: fechaISO()
+    });
+    guardar(K_USUARIOS, usuarios);
+
+    msg(out, '✅ Cuenta creada. Un administrador debe asignarte créditos para empezar a comprar.', 'ok');
+    $('formRegistro').reset();
+
+    setTimeout(() => {
+      mostrarTab('login');
+      $('loginUsuario').value = u;
+      $('loginClave').focus();
+      msg(out, '');
+    }, 1600);
+  });
+
+  /* ---------------- LOGIN ---------------- */
+  $('formLogin').addEventListener('submit', function(e){
+    e.preventDefault();
+    const u = $('loginUsuario').value.trim();
+    const c = $('loginClave').value;
+    const out = $('msgLogin');
+
+    const usuarios = leer(K_USUARIOS, []);
+    const encontrado = usuarios.find(x => x.usuario.toLowerCase() === u.toLowerCase());
+
+    if (!encontrado) return msg(out, 'Usuario no registrado.', 'error');
+    if (encontrado.clave !== hash(c)) return msg(out, 'Contraseña incorrecta.', 'error');
+
+    iniciarSesion(encontrado.usuario);
+  });
+
+  function iniciarSesion(usuario){
+    usuarioActual = usuario;
+    localStorage.setItem(K_SESION, usuario);
+
+    $('pantallaAuth').classList.add('oculto');
+    $('pantallaApp').classList.remove('oculto');
+    $('nombreUsuario').textContent = usuario;
+
+    const admin = esModoAdmin();
+
+    $('seccionAdmin').classList.toggle('oculto', !admin);
+    $('seccionFormNave').classList.toggle('oculto', admin);
+    $('seccionCatalogo').classList.toggle('oculto', admin);
+    $('seccionInventario').classList.toggle('oculto', admin);
+    $('badgeAdmin').classList.toggle('oculto', !admin);
+    $('saldoUsuario').classList.toggle('oculto', admin);
+
+    $('formLogin').reset();
+    msg($('msgLogin'), '');
+    renderTodo();
+  }
+
+  function cerrarSesion(){
+    usuarioActual = null;
+    localStorage.removeItem(K_SESION);
+    $('pantallaApp').classList.add('oculto');
+    $('pantallaAuth').classList.remove('oculto');
+    mostrarTab('login');
+    $('loginClave').value = '';
+  }
+  $('btnSalir').addEventListener('click', cerrarSesion);
+
+  /* ---------------- AÑADIR NAVE ---------------- */
+  $('formNave').addEventListener('submit', function(e){
+    e.preventDefault();
+    const out = $('msgNave');
+
+    const nave = {
+      id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      nombre: $('naveNombre').value.trim(),
+      categoria: $('naveCategoria').value,
+      precio: Number($('navePrecio').value),
+      stock: Number($('naveStock').value),
+      empresa: $('naveEmpresa').value.trim(),
+      imagen: $('naveImagen').value.trim(),
+      descripcion: $('naveDescripcion').value.trim(),
+      vendedor: usuarioActual,
+      fecha: fechaISO()
+    };
+
+    if (!nave.nombre || !nave.categoria || !nave.empresa || !nave.imagen || !nave.descripcion)
+      return msg(out, 'Completa todos los campos obligatorios.', 'error');
+    if (!(nave.precio >= 0) || !(nave.stock >= 0))
+      return msg(out, 'El precio y el stock deben ser números válidos.', 'error');
+
+    const naves = leer(K_NAVES, []);
+    naves.unshift(nave);
+    guardar(K_NAVES, naves);
+
+    $('formNave').reset();
+    renderTodo();
+    msg(out, '✅ Nave publicada en el catálogo.', 'ok');
+    setTimeout(() => msg(out, ''), 4000);
+  });
+
+  /* ---------------- COMPRAR ---------------- */
+  function comprar(naveId, cantidad){
+    cantidad = Math.floor(Number(cantidad));
+    if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
+
+    const naves = leer(K_NAVES, []);
+    const nave = naves.find(n => n.id === naveId);
+    if (!nave) return toast('Nave no encontrada', 'error');
+    if (nave.vendedor === usuarioActual) return toast('No puedes comprar tu propia publicación', 'error');
+    if (nave.stock < cantidad) return toast('Stock insuficiente', 'error');
+
+    const total = nave.precio * cantidad;
+    const usuarios = leer(K_USUARIOS, []);
+    const comprador = usuarios.find(u => u.usuario === usuarioActual);
+    if (!comprador) return;
+
+    if ((comprador.dinero || 0) < total)
+      return toast('No tienes suficientes créditos. Pídele al administrador 💸', 'error');
+
+    comprador.dinero -= total;
+
+    const vendedor = usuarios.find(u => u.usuario === nave.vendedor);
+    if (vendedor) vendedor.dinero = (vendedor.dinero || 0) + total;
+
+    nave.stock -= cantidad;
+    añadirAlInventario(comprador, nave, cantidad);
+
+    guardar(K_USUARIOS, usuarios);
+    guardar(K_NAVES, naves);
+
+    renderTodo();
+    toast(`✅ Compraste ${cantidad} × ${nave.nombre} por ${fmtNum(total)} cr`, 'ok');
+  }
+
+  function añadirAlInventario(usuario, nave, cantidad){
+    if (!Array.isArray(usuario.inventario)) usuario.inventario = [];
+    const existente = usuario.inventario.find(i => i.naveId === nave.id && i.precio === nave.precio);
+    if (existente){
+      existente.cantidad += cantidad;
+    } else {
+      usuario.inventario.push({
+        id: 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        naveId: nave.id,
+        nombre: nave.nombre,
+        categoria: nave.categoria,
+        precio: nave.precio,
+        empresa: nave.empresa,
+        imagen: nave.imagen,
+        cantidad: cantidad,
+        fecha: fechaISO()
+      });
+    }
+  }
+
+  /* ---------------- VENDER ---------------- */
+  function venderItem(invId, cantidad){
+    cantidad = Math.floor(Number(cantidad));
+    if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
+
+    const usuarios = leer(K_USUARIOS, []);
+    const u = usuarios.find(x => x.usuario === usuarioActual);
+    if (!u) return;
+    const item = (u.inventario || []).find(i => i.id === invId);
+    if (!item) return toast('No tienes esa nave', 'error');
+    if (cantidad > item.cantidad) return toast('No tienes esa cantidad', 'error');
+
+    const total = item.precio * cantidad;
+    u.dinero = (u.dinero || 0) + total;
+
+    item.cantidad -= cantidad;
+    if (item.cantidad <= 0) u.inventario = u.inventario.filter(i => i.id !== invId);
+
+    const naves = leer(K_NAVES, []);
+    const nave = naves.find(n => n.id === item.naveId);
+    if (nave) nave.stock += cantidad;
+
+    guardar(K_USUARIOS, usuarios);
+    guardar(K_NAVES, naves);
+
+    renderTodo();
+    toast(`💸 Vendiste ${cantidad} × ${item.nombre} por ${fmtNum(total)} cr`, 'ok');
+  }
+
+  /* ---------------- DESCARTAR (eliminar del inventario propio) ---------------- */
+  function descartarItem(invId, cantidad){
+    cantidad = Math.floor(Number(cantidad));
+    if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
+
+    const usuarios = leer(K_USUARIOS, []);
+    const u = usuarios.find(x => x.usuario === usuarioActual);
+    if (!u) return;
+    const item = (u.inventario || []).find(i => i.id === invId);
+    if (!item) return toast('No tienes esa nave', 'error');
+    if (cantidad > item.cantidad) return toast('No tienes esa cantidad', 'error');
+
+    if (!confirm(`¿Eliminar ${cantidad} × ${item.nombre} de tu inventario?\n\n⚠️ No recuperarás créditos ni stock.`)) return;
+
+    item.cantidad -= cantidad;
+    if (item.cantidad <= 0) u.inventario = u.inventario.filter(i => i.id !== invId);
+
+    guardar(K_USUARIOS, usuarios);
+    renderTodo();
+    toast(`🗑 Eliminadas ${cantidad} × ${item.nombre} de tu inventario`, 'ok');
+  }
+
+  /* ---------------- RENDER GENERAL ---------------- */
+  function renderTodo(){
+    if (esModoAdmin()){
+      renderAdmin();
+    } else {
+      renderSaldo();
+      renderNaves();
+      renderInventario();
+    }
+  }
+
+  function renderSaldo(){
+    const u = getUsuario(usuarioActual);
+    $('saldoUsuario').textContent = '💰 ' + fmtNum(u ? u.dinero : 0) + ' cr';
+  }
+
+  /* ---------------- CATÁLOGO ---------------- */
+  function renderNaves(){
+    const grid = $('gridNaves');
+    const filtro = $('buscador').value.trim().toLowerCase();
+
+    let naves = leer(K_NAVES, []);
+    $('contador').textContent = naves.length;
+
+    if (filtro){
+      naves = naves.filter(n =>
+        n.nombre.toLowerCase().includes(filtro) ||
+        n.empresa.toLowerCase().includes(filtro) ||
+        n.categoria.toLowerCase().includes(filtro)
+      );
+    }
+
+    $('vacio').classList.toggle('oculto', naves.length > 0);
+    const miSaldo = (getUsuario(usuarioActual) || {}).dinero || 0;
+
+    grid.innerHTML = naves.map(n => {
+      const agotado = Number(n.stock) <= 0;
+      const propio  = (n.vendedor === usuarioActual);
+      const sinDinero = miSaldo < n.precio;
+      const puedeComprar = !agotado && !propio && !sinDinero;
+
+      let bloqueCompra;
+      if (propio){
+        bloqueCompra = `<p class="propio">⭐ Tu publicación</p>`;
+      } else if (agotado){
+        bloqueCompra = `<p class="propio" style="color:var(--error)">❌ Sin stock</p>`;
+      } else {
+        bloqueCompra = `
+          <div class="compra-row">
+            <input type="number" class="cant-input" min="1" max="${n.stock}" value="1" data-id="${esc(n.id)}">
+            <button class="btn ${puedeComprar ? 'primario' : ''} mini" data-comprar="${esc(n.id)}" ${puedeComprar ? '' : 'disabled'}
+              title="${puedeComprar ? 'Comprar esta nave' : 'Sin créditos suficientes. Pídele al administrador.'}">
+              ${puedeComprar ? '🛒 Comprar' : '💸 Sin saldo'}
+            </button>
+          </div>`;
+      }
+
+      return `
+        <article class="nave">
+          <div class="nave-img">
+            <img src="${esc(n.imagen)}" alt="${esc(n.nombre)}" loading="lazy">
+          </div>
+          <div class="nave-body">
+            <span class="tag">${esc(n.categoria)}</span>
+            <h4>${esc(n.nombre)}</h4>
+            <p class="empresa">🏭 ${esc(n.empresa)}</p>
+            <p class="desc">${esc(n.descripcion)}</p>
+            <div class="datos">
+              <span class="precio">💰 ${fmtNum(n.precio)} cr</span>
+              <span class="stock ${agotado ? 'agotado' : ''}">
+                ${agotado ? '❌ Agotado' : '📦 Stock: ' + fmtNum(n.stock)}
+              </span>
+            </div>
+            ${bloqueCompra}
+            <div class="nave-pie">
+              <span>Publicado por ${esc(n.vendedor)}</span>
+              ${propio ? `<button class="btn mini peligro" data-borrar="${esc(n.id)}">Eliminar</button>` : ''}
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+
+    grid.querySelectorAll('img').forEach(img => {
+      img.addEventListener('error', () => { img.src = PLACEHOLDER; }, { once: true });
+    });
+
+    grid.querySelectorAll('[data-borrar]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-borrar');
+        if (!confirm('¿Eliminar esta nave del catálogo?\n(El stock desaparecerá y no se devuelve dinero)')) return;
+        guardar(K_NAVES, leer(K_NAVES, []).filter(x => x.id !== id));
+        renderTodo();
+        toast('Nave eliminada del catálogo', 'ok');
+      });
+    });
+  }
+
+  // Delegación: comprar
+  $('gridNaves').addEventListener('click', e => {
+    const btn = e.target.closest('[data-comprar]');
+    if (!btn) return;
+    const id = btn.getAttribute('data-comprar');
+    const card = btn.closest('.nave');
+    const input = card.querySelector('.cant-input');
+    comprar(id, input ? input.value : 1);
+  });
+
+  $('buscador').addEventListener('input', renderNaves);
+
+  /* ---------------- INVENTARIO (vista usuario) ---------------- */
+  function renderInventario(){
+    const cont = $('inventario');
+    const u = getUsuario(usuarioActual);
+    const items = (u && Array.isArray(u.inventario)) ? u.inventario : [];
+
+    $('invVacio').classList.toggle('oculto', items.length > 0);
+
+    const totalUnidades = items.reduce((s, i) => s + i.cantidad, 0);
+    $('invContador').textContent = items.length
+      ? `— ${totalUnidades} unidad${totalUnidades === 1 ? '' : 'es'} en ${items.length} modelo${items.length === 1 ? '' : 's'}`
+      : '';
+
+    if (!items.length){ cont.innerHTML = ''; return; }
+
+    const grupos = {};
+    items.forEach(it => {
+      const cat = it.categoria || 'Otras';
+      if (!grupos[cat]) grupos[cat] = [];
+      grupos[cat].push(it);
+    });
+
+    const orden = [...CATEGORIAS, ...Object.keys(grupos).filter(c => !CATEGORIAS.includes(c))];
+
+    cont.innerHTML = orden.filter(cat => grupos[cat]).map(cat => {
+      const lista = grupos[cat];
+      const unidades = lista.reduce((s, i) => s + i.cantidad, 0);
+      const filas = lista.map(it => `
+        <div class="inv-item">
+          <img src="${esc(it.imagen)}" alt="${esc(it.nombre)}" loading="lazy">
+          <div class="inv-info">
+            <div class="inv-nombre">${esc(it.nombre)}</div>
+            <div class="inv-empresa">🏭 ${esc(it.empresa || '—')}</div>
+            <div class="inv-meta">
+              Precio: <b>${fmtNum(it.precio)} cr</b> · Tienes: <b>${fmtNum(it.cantidad)}</b>
+            </div>
+          </div>
+          <div class="inv-acciones">
+            <input type="number" class="cant-input" min="1" max="${it.cantidad}" value="1" data-inv="${esc(it.id)}">
+            <button class="btn oro mini" data-vender="${esc(it.id)}">💸 Vender</button>
+            <button class="btn peligro mini" data-descartar="${esc(it.id)}" title="Eliminar del inventario sin recuperar créditos">🗑</button>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="inv-grupo">
+          <h4>${esc(cat)} · ${unidades} unidad${unidades === 1 ? '' : 'es'}</h4>
+          ${filas}
+        </div>`;
+    }).join('');
+
+    cont.querySelectorAll('img').forEach(img => {
+      img.addEventListener('error', () => { img.src = PLACEHOLDER; }, { once: true });
+    });
+  }
+
+  // Delegación: vender / descartar
+  $('inventario').addEventListener('click', e => {
+    const row = e.target.closest('.inv-item');
+    if (!row) return;
+    const input = row.querySelector('.cant-input');
+
+    const btnVender = e.target.closest('[data-vender]');
+    const btnDescartar = e.target.closest('[data-descartar]');
+
+    if (btnVender){
+      venderItem(btnVender.getAttribute('data-vender'), input ? input.value : 1);
+    } else if (btnDescartar){
+      descartarItem(btnDescartar.getAttribute('data-descartar'), input ? input.value : 1);
+    }
+  });
+
+  /* ---------------- PANEL ADMIN ---------------- */
+  function renderAdmin(){
+    const usuarios = leer(K_USUARIOS, []);
+    const otros = usuarios
+      .filter(u => u.usuario !== ADMIN_USER)
+      .sort((a, b) => a.usuario.localeCompare(b.usuario));
+
+    const totalDinero = otros.reduce((s, u) => s + (u.dinero || 0), 0);
+    $('adminResumen').innerHTML = `
+      <span>👥 Usuarios registrados: <b>${otros.length}</b></span>
+      <span>💰 Créditos en circulación: <b>${fmtNum(totalDinero)} cr</b></span>
+    `;
+
+    // ---- Lista de usuarios ----
+    const cont = $('listaUsuarios');
+    if (!otros.length){
+      cont.innerHTML = '<p class="vacio">No hay usuarios registrados todavía.<br>Los nuevos registros aparecerán aquí automáticamente.</p>';
+    } else {
+      cont.innerHTML = otros.map(u => {
+        const inv = u.inventario || [];
+        const unidades = inv.reduce((s, i) => s + (i.cantidad || 0), 0);
+        const fechaReg = u.creado ? new Date(u.creado).toLocaleDateString('es-ES') : '—';
+        const abierto = invAbiertos.has(u.usuario);
+
+        const invHTML = inv.length
+          ? inv.map(it => `
+              <div class="inv-item">
+                <img src="${esc(it.imagen)}" alt="" loading="lazy">
+                <div class="inv-info">
+                  <div class="inv-nombre">${esc(it.nombre)}</div>
+                  <div class="inv-empresa">${esc(it.categoria)} · ${esc(it.empresa || '—')}</div>
+                  <div class="inv-meta">Tiene: <b>${fmtNum(it.cantidad)}</b> · Precio: ${fmtNum(it.precio)} cr</div>
+                </div>
+                <div class="inv-acciones">
+                  <input type="number" min="1" max="${it.cantidad}" value="1"
+                         data-admin-inv-input="${esc(it.id)}" data-admin-inv-user="${esc(u.usuario)}">
+                  <button class="btn peligro mini"
+                          data-admin-del-inv="${esc(it.id)}"
+                          data-admin-inv-user="${esc(u.usuario)}">🗑 Eliminar</button>
+                </div>
+              </div>
+            `).join('')
+          : '<p style="color:var(--suave);font-size:.8rem;padding:8px 4px">Este usuario no tiene naves en su inventario.</p>';
+
+        return `
+          <div class="usuario-item">
+            <div class="usuario-info">
+              <div class="usuario-nombre">👤 ${esc(u.usuario)}</div>
+              <div class="usuario-meta">Registrado: ${fechaReg} · Inventario: ${unidades} nave${unidades === 1 ? '' : 's'}</div>
+            </div>
+            <div class="usuario-saldo">💰 ${fmtNum(u.dinero || 0)} cr</div>
+            <div class="usuario-add">
+              <input type="number" min="1" step="1000" placeholder="Créditos" data-input="${esc(u.usuario)}">
+              <button class="btn oro mini" data-add="${esc(u.usuario)}" title="Añadir créditos">➕ Añadir</button>
+              <button class="btn quitar mini" data-remove="${esc(u.usuario)}" title="Quitar créditos">➖ Quitar</button>
+            </div>
+            <button class="btn mini" data-toggle-inv="${esc(u.usuario)}">
+              📦 ${abierto ? 'Ocultar' : 'Ver'} inventario (${unidades})
+            </button>
+          </div>
+          <div class="usuario-inv ${abierto ? '' : 'oculto'}">
+            ${invHTML}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ---- Gestión del catálogo ----
+    const naves = leer(K_NAVES, []);
+    const catCont = $('listaCatalogoAdmin');
+    if (!naves.length){
+      catCont.innerHTML = '<p class="vacio">No hay naves publicadas en el catálogo.</p>';
+    } else {
+      catCont.innerHTML = naves.map(n => `
+        <div class="admin-catalogo-item">
+          <div class="admin-cat-info">
+            <div class="inv-nombre">${esc(n.nombre)}</div>
+            <div class="inv-empresa">${esc(n.categoria)} · ${esc(n.empresa)} · vendedor: ${esc(n.vendedor)}</div>
+            <div class="inv-meta">Precio: ${fmtNum(n.precio)} cr · Stock: <b>${fmtNum(n.stock)}</b></div>
+          </div>
+          <div class="usuario-add">
+            <input type="number" min="1" max="${Math.max(n.stock, 1)}" value="1" data-stock-input="${esc(n.id)}">
+            <button class="btn peligro mini" data-reduce-stock="${esc(n.id)}"
+                    ${n.stock <= 0 ? 'disabled' : ''} title="Reducir stock">🗑 Reducir stock</button>
+            <button class="btn peligro mini" data-delete-ship="${esc(n.id)}" title="Eliminar nave completa">🗑 Eliminar nave</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Imágenes placeholder
+    document.querySelectorAll('#seccionAdmin img').forEach(img => {
+      img.addEventListener('error', () => { img.src = PLACEHOLDER; }, { once: true });
+    });
+  }
+
+  /* ---------------- ADMIN: añadir / quitar créditos ---------------- */
+  function adminAgregarDinero(userName, cant){
+    cant = Math.floor(Number(cant));
+    if (!Number.isFinite(cant) || cant < 1) return toast('Cantidad inválida', 'error');
+
+    const usuarios = leer(K_USUARIOS, []);
+    const u = usuarios.find(x => x.usuario === userName);
+    if (!u) return toast('Usuario no encontrado', 'error');
+
+    u.dinero = (u.dinero || 0) + cant;
+    guardar(K_USUARIOS, usuarios);
+    renderAdmin();
+    toast(`✅ Añadidos ${fmtNum(cant)} cr a ${userName}`, 'ok');
+  }
+
+  function adminQuitarDinero(userName, cant){
+    cant = Math.floor(Number(cant));
+    if (!Number.isFinite(cant) || cant < 1) return toast('Cantidad inválida', 'error');
+
+    const usuarios = leer(K_USUARIOS, []);
+    const u = usuarios.find(x => x.usuario === userName);
+    if (!u) return toast('Usuario no encontrado', 'error');
+
+    const tiene = u.dinero || 0;
+    if (tiene <= 0){
+      toast(`${userName} no tiene créditos para quitar`, 'error');
+      return;
+    }
+
+    const quitar = Math.min(cant, tiene);
+    u.dinero = tiene - quitar;
+    guardar(K_USUARIOS, usuarios);
+    renderAdmin();
+
+    if (quitar < cant){
+      toast(`⚠️ Solo se pudieron quitar ${fmtNum(quitar)} cr (tenía ${fmtNum(tiene)})`, 'error');
+    } else {
+      toast(`✅ Quitados ${fmtNum(cant)} cr a ${userName}`, 'ok');
+    }
+  }
+
+  /* ---------------- ADMIN: eliminar naves del inventario de un usuario ---------------- */
+  function adminEliminarDeInventario(userName, invId, cant){
+    cant = Math.floor(Number(cant));
+    if (!(cant >= 1)) return toast('Cantidad inválida', 'error');
+
+    const usuarios = leer(K_USUARIOS, []);
+    const u = usuarios.find(x => x.usuario === userName);
+    if (!u) return toast('Usuario no encontrado', 'error');
+
+    const item = (u.inventario || []).find(i => i.id === invId);
+    if (!item) return toast('Ese usuario no tiene esa nave', 'error');
+    if (cant > item.cantidad) return toast(`Solo tiene ${item.cantidad} unidades`, 'error');
+
+    if (!confirm(`¿Eliminar ${cant} × ${item.nombre} del inventario de ${userName}?\n\n⚠️ No se devuelve dinero ni stock.`)) return;
+
+    item.cantidad -= cant;
+    if (item.cantidad <= 0) u.inventario = u.inventario.filter(i => i.id !== invId);
+
+    guardar(K_USUARIOS, usuarios);
+    renderAdmin();
+    toast(`🗑 Eliminadas ${cant} × ${item.nombre} del inventario de ${userName}`, 'ok');
+  }
+
+  /* ---------------- ADMIN: gestionar catálogo ---------------- */
+  function adminReducirStock(naveId, cant){
+    cant = Math.floor(Number(cant));
+    if (!(cant >= 1)) return toast('Cantidad inválida', 'error');
+
+    const naves = leer(K_NAVES, []);
+    const nave = naves.find(n => n.id === naveId);
+    if (!nave) return toast('Nave no encontrada', 'error');
+    if (nave.stock < cant) return toast(`Solo hay ${nave.stock} unidades en stock`, 'error');
+
+    nave.stock -= cant;
+    guardar(K_NAVES, naves);
+    renderAdmin();
+    toast(`Stock reducido: -${cant} de ${nave.nombre}`, 'ok');
+  }
+
+  function adminEliminarNave(naveId){
+    const naves = leer(K_NAVES, []);
+    const nave = naves.find(n => n.id === naveId);
+    if (!nave) return toast('Nave no encontrada', 'error');
+
+    if (!confirm(`¿Eliminar COMPLETAMENTE "${nave.nombre}" del catálogo?\n\nLos usuarios que ya la compraron la conservan en su inventario.`)) return;
+
+    guardar(K_NAVES, naves.filter(n => n.id !== naveId));
+    renderAdmin();
+    toast('Nave eliminada del catálogo', 'ok');
+  }
+
+  // Delegación: lista de usuarios
+  $('listaUsuarios').addEventListener('click', e => {
+    const btnAdd = e.target.closest('[data-add]');
+    const btnRemove = e.target.closest('[data-remove]');
+    const btnToggle = e.target.closest('[data-toggle-inv]');
+    const btnDelInv = e.target.closest('[data-admin-del-inv]');
+
+    if (btnAdd){
+      const user = btnAdd.getAttribute('data-add');
+      const input = btnAdd.closest('.usuario-add').querySelector('[data-input]');
+      adminAgregarDinero(user, input.value);
+      return;
+    }
+    if (btnRemove){
+      const user = btnRemove.getAttribute('data-remove');
+      const input = btnRemove.closest('.usuario-add').querySelector('[data-input]');
+      adminQuitarDinero(user, input.value);
+      return;
+    }
+    if (btnToggle){
+      const user = btnToggle.getAttribute('data-toggle-inv');
+      if (invAbiertos.has(user)) invAbiertos.delete(user);
+      else invAbiertos.add(user);
+      renderAdmin();
+      return;
+    }
+    if (btnDelInv){
+      const invId = btnDelInv.getAttribute('data-admin-del-inv');
+      const user  = btnDelInv.getAttribute('data-admin-inv-user');
+      const input = btnDelInv.closest('.inv-acciones').querySelector('[data-admin-inv-input]');
+      adminEliminarDeInventario(user, invId, input.value);
+      return;
+    }
+  });
+
+  // Delegación: catálogo admin
+  $('listaCatalogoAdmin').addEventListener('click', e => {
+    const btnReduce = e.target.closest('[data-reduce-stock]');
+    const btnDelete = e.target.closest('[data-delete-ship]');
+
+    if (btnReduce){
+      const id = btnReduce.getAttribute('data-reduce-stock');
+      const input = btnReduce.closest('.usuario-add').querySelector('[data-stock-input]');
+      adminReducirStock(id, input.value);
+      return;
+    }
+    if (btnDelete){
+      adminEliminarNave(btnDelete.getAttribute('data-delete-ship'));
+      return;
+    }
+  });
+
+  /* ---------------- EXPORTAR ---------------- */
+  $('btnExportar').addEventListener('click', () => {
+    const db = {
+      app: 'Logística de Naves',
+      version: 4,
+      exportado: fechaISO(),
+      usuarios: leer(K_USUARIOS, []),
+      naves: leer(K_NAVES, [])
+    };
+
+    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'logistica_naves_db.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast('📥 Base de datos exportada', 'ok');
+  });
+
+  /* ---------------- IMPORTAR ---------------- */
+  $('btnImportar').addEventListener('click', () => $('inputArchivo').click());
+
+  $('inputArchivo').addEventListener('change', function(e){
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const db = JSON.parse(reader.result);
+        if (!Array.isArray(db.usuarios) || !Array.isArray(db.naves))
+          throw new Error('El archivo no tiene el formato esperado.');
+
+        const reemplazar = confirm('¿REEMPLAZAR todos los datos actuales?\n\nAceptar = Reemplazar\nCancelar = Fusionar');
+
+        if (reemplazar){
+          db.usuarios.forEach(u => {
+            if (typeof u.dinero !== 'number') u.dinero = DINERO_INICIAL;
+            if (!Array.isArray(u.inventario)) u.inventario = [];
+          });
+          guardar(K_USUARIOS, db.usuarios);
+          guardar(K_NAVES, db.naves);
+        } else {
+          const usuarios = leer(K_USUARIOS, []);
+          db.usuarios.forEach(u => {
+            if (!usuarios.some(x => x.usuario.toLowerCase() === String(u.usuario).toLowerCase())){
+              if (typeof u.dinero !== 'number') u.dinero = DINERO_INICIAL;
+              if (!Array.isArray(u.inventario)) u.inventario = [];
+              usuarios.push(u);
+            }
+          });
+          guardar(K_USUARIOS, usuarios);
+
+          const naves = leer(K_NAVES, []);
+          db.naves.forEach(n => { if (!naves.some(x => x.id === n.id)) naves.push(n); });
+          guardar(K_NAVES, naves);
+        }
+
+        asegurarAdmin();
+
+        const sesion = localStorage.getItem(K_SESION);
+        const usuarios = leer(K_USUARIOS, []);
+        if (sesion && !usuarios.some(u => u.usuario === sesion)) cerrarSesion();
+        if (usuarioActual) renderTodo();
+
+        alert('✅ Datos importados correctamente.');
+
+      } catch (err) {
+        alert('❌ Archivo no válido: ' + err.message);
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+
+  /* ---------------- ARRANQUE ---------------- */
+  (function init(){
+    migrarDatos();
+    asegurarAdmin();
+
+    const sesion = localStorage.getItem(K_SESION);
+    const usuarios = leer(K_USUARIOS, []);
+    if (sesion && usuarios.some(u => u.usuario === sesion)){
+      iniciarSesion(sesion);
+    } else {
+      localStorage.removeItem(K_SESION);
+      mostrarTab('login');
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
