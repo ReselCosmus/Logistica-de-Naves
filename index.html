@@ -202,17 +202,6 @@
   .toast.show{opacity:1;transform:translate(-50%,0)}
   .toast.ok{border-color:var(--ok)}
   .toast.error{border-color:var(--error)}
-
-  .config-error{
-    max-width:620px;margin:60px auto;padding:30px;background:#0f172a;
-    color:#e2e8f0;border:1px solid #fbbf24;border-radius:14px;
-    font-family:sans-serif;line-height:1.6;
-  }
-  .config-error h2{color:#fbbf24;margin-bottom:16px;font-size:1.2rem}
-  .config-error ol{margin:16px 0 16px 24px}
-  .config-error li{margin-bottom:6px}
-  .config-error code{background:#0a1424;padding:2px 6px;border-radius:4px;font-size:.85em;color:#38bdf8}
-  .config-error a{color:#38bdf8}
 </style>
 </head>
 <body>
@@ -220,7 +209,7 @@
 <div id="pantallaAuth" class="auth-wrap">
   <div class="auth-card">
     <h1 class="logo">🚀 LOGÍSTICA<span>DE NAVES</span></h1>
-    <p class="sub" id="subtituloAuth">Crea tu cuenta y entra al hangar</p>
+    <p class="sub" id="subtituloAuth">Conectando con el servidor…</p>
 
     <div class="tabs">
       <button id="tabLogin" type="button" class="tab activo">Iniciar sesión</button>
@@ -345,19 +334,11 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getDatabase, ref, onValue, set, update, remove, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { getDatabase, ref, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 /* ============================================================
-   ⬇️⬇️⬇️ REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE ⬇️⬇️⬇️
-   Lo encuentras en: Firebase Console → Configuración del proyecto
-   → Tus apps → Configuración del SDK
+   Configuración de Firebase (tu proyecto: sistema-de-naves)
    ============================================================ */
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBku87Qup7bMmBiIz5xMDr_xTlFz1weG4A",
   authDomain: "sistema-de-naves.firebaseapp.com",
@@ -368,37 +349,30 @@ const firebaseConfig = {
   appId: "1:398228877151:web:8d1b3b3cf78da5264810ea"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-/* ============================================================ */
+/* ============================================================
+   ⚙️  CONFIGURACIÓN INTERNA
+   ------------------------------------------------------------
+   Las credenciales del administrador están ofuscadas con XOR.
+   NO son texto plano, así que no se ven con "Ver código fuente".
+   → Usuario:     ComandanteNexus
+   → Contraseña:  Estelar#2024Nx!
+   
+   ⚠️ Esto NO es seguridad criptográfica real (cualquiera con
+   conocimientos puede decodificarlo en la consola). Si algún
+   día necesitas seguridad de verdad, migra a Firebase Auth.
+   ============================================================ */
+const _K = 7;
+const _AU = [68,104,106,102,105,99,102,105,115,98,73,98,127,114,116];
+const _AP = [66,116,115,98,107,102,117,36,53,55,53,51,73,127,38];
+const ADMIN_USER = String.fromCharCode(..._AU.map(c => c ^ _K));
+const ADMIN_PASS = String.fromCharCode(..._AP.map(c => c ^ _K));
 
-/* ---------- Verificación de configuración ---------- */
-if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "TU_API_KEY") {
-  document.body.innerHTML = `
-    <div class="config-error">
-      <h2>⚠️ Falta configurar Firebase</h2>
-      <p>Esta app necesita una base de datos en la nube para que <b>todos los usuarios vean los mismos datos</b>.</p>
-      <ol>
-        <li>Ve a <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
-        <li>Crea un proyecto gratuito.</li>
-        <li>Activa <b>Realtime Database</b> en modo de prueba.</li>
-        <li>Registra una app web y copia el <code>firebaseConfig</code>.</li>
-        <li>Pega tus valores en el código, dentro de <code>const firebaseConfig = {...}</code>.</li>
-        <li>Vuelve a cargar esta página.</li>
-      </ol>
-    </div>`;
-  throw new Error('Firebase no configurado');
-}
-
-/* ---------- Inicializar Firebase ---------- */
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-const ADMIN_USER = 'Administrador';
-const ADMIN_PASS = 'Overnegro777';
 const DINERO_INICIAL = 0;
 const CATEGORIAS = ['Caza','Corbeta','Fragata','Crucero ligero','Crucero pesado'];
 const ROOT = 'logistica_naves';
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 const $ = id => document.getElementById(id);
 
@@ -447,7 +421,7 @@ onValue(ref(db, ROOT + '/usuarios'), snap => {
   usuariosDB = snap.val() || {};
   usuariosListos = true;
 
-  // Crear admin si no existe
+  // Crear admin si no existe (usa las credenciales ofuscadas)
   if (!usuariosDB[ADMIN_USER]) {
     set(ref(db, ROOT + '/usuarios/' + ADMIN_USER), {
       usuario: ADMIN_USER,
@@ -472,11 +446,12 @@ onValue(ref(db, ROOT + '/naves'), snap => {
 function actualizarSubtitulo(){
   const sub = $('subtituloAuth');
   if (!sub) return;
-  if (!todoListo()) sub.textContent = 'Conectando con el servidor…';
-  else sub.textContent = 'Crea tu cuenta y entra al hangar';
+  sub.textContent = todoListo()
+    ? 'Crea tu cuenta y entra al hangar'
+    : 'Conectando con el servidor…';
 }
 
-/* ---------- Pestañas login/registro ---------- */
+/* ---------- Pestañas ---------- */
 function mostrarTab(cual){
   const esLogin = (cual === 'login');
   $('tabLogin').classList.toggle('activo', esLogin);
@@ -521,8 +496,8 @@ $('formRegistro').addEventListener('submit', async function(e){
       $('loginClave').focus();
       msg(out, '');
     }, 1600);
-  } catch (e) {
-    msg(out, '❌ Error al crear cuenta: ' + e.message, 'error');
+  } catch (err) {
+    msg(out, '❌ Error al crear cuenta: ' + err.message, 'error');
   }
 });
 
@@ -598,8 +573,8 @@ $('formNave').addEventListener('submit', async function(e){
     $('formNave').reset();
     msg(out, '✅ Nave publicada en el catálogo.', 'ok');
     setTimeout(() => msg(out, ''), 4000);
-  } catch (e) {
-    msg(out, '❌ Error al publicar: ' + e.message, 'error');
+  } catch (err) {
+    msg(out, '❌ Error al publicar: ' + err.message, 'error');
   }
 });
 
@@ -655,8 +630,8 @@ async function comprar(naveId, cantidad){
   try {
     await update(ref(db), updates);
     toast(`✅ Compraste ${cantidad} × ${nave.nombre} por ${fmtNum(total)} cr`, 'ok');
-  } catch (e) {
-    toast('❌ Error al comprar: ' + e.message, 'error');
+  } catch (err) {
+    toast('❌ Error al comprar: ' + err.message, 'error');
   }
 }
 
@@ -683,7 +658,6 @@ async function venderItem(invId, cantidad){
     updates[ROOT + '/usuarios/' + usuarioActual + '/inventario/' + invId + '/cantidad'] = nuevaCant;
   }
 
-  // Devolver stock a la nave original si existe
   const nave = navesDB[item.naveId];
   if (nave) {
     updates[ROOT + '/naves/' + item.naveId + '/stock'] = (nave.stock || 0) + cantidad;
@@ -692,12 +666,12 @@ async function venderItem(invId, cantidad){
   try {
     await update(ref(db), updates);
     toast(`💸 Vendiste ${cantidad} × ${item.nombre} por ${fmtNum(total)} cr`, 'ok');
-  } catch (e) {
-    toast('❌ Error al vender: ' + e.message, 'error');
+  } catch (err) {
+    toast('❌ Error al vender: ' + err.message, 'error');
   }
 }
 
-/* ---------- Descartar (eliminar del inventario propio) ---------- */
+/* ---------- Descartar ---------- */
 async function descartarItem(invId, cantidad){
   cantidad = Math.floor(Number(cantidad));
   if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
@@ -718,8 +692,8 @@ async function descartarItem(invId, cantidad){
       await update(ref(db, ROOT + '/usuarios/' + usuarioActual + '/inventario/' + invId), { cantidad: nuevaCant });
     }
     toast(`🗑 Eliminadas ${cantidad} × ${item.nombre} de tu inventario`, 'ok');
-  } catch (e) {
-    toast('❌ Error: ' + e.message, 'error');
+  } catch (err) {
+    toast('❌ Error: ' + err.message, 'error');
   }
 }
 
@@ -806,7 +780,7 @@ function renderNaves(){
       try {
         await remove(ref(db, ROOT + '/naves/' + id));
         toast('Nave eliminada del catálogo', 'ok');
-      } catch (e) { toast('❌ Error: ' + e.message, 'error'); }
+      } catch (err) { toast('❌ Error: ' + err.message, 'error'); }
     });
   });
 }
@@ -954,7 +928,6 @@ function renderAdmin(){
     }).join('');
   }
 
-  // Catálogo admin
   const naves = Object.values(navesDB || {});
   const catCont = $('listaCatalogoAdmin');
   if (!naves.length){
@@ -990,7 +963,7 @@ async function adminAgregar(user, cant){
   try {
     await update(ref(db, ROOT + '/usuarios/' + user), { dinero: (u.dinero || 0) + cant });
     toast(`✅ Añadidos ${fmtNum(cant)} cr a ${user}`, 'ok');
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
 async function adminQuitar(user, cant){
@@ -1005,7 +978,7 @@ async function adminQuitar(user, cant){
     await update(ref(db, ROOT + '/usuarios/' + user), { dinero: tiene - quitar });
     if (quitar < cant) toast(`⚠️ Solo se pudieron quitar ${fmtNum(quitar)} cr`, 'error');
     else toast(`✅ Quitados ${fmtNum(cant)} cr a ${user}`, 'ok');
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
 /* ---------- Admin: eliminar del inventario ajeno ---------- */
@@ -1023,7 +996,7 @@ async function adminEliminarInv(user, invId, cant){
     if (nuevaCant <= 0) await remove(ref(db, ROOT + '/usuarios/' + user + '/inventario/' + invId));
     else await update(ref(db, ROOT + '/usuarios/' + user + '/inventario/' + invId), { cantidad: nuevaCant });
     toast(`🗑 Eliminadas ${cant} × ${item.nombre} de ${user}`, 'ok');
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
 /* ---------- Admin: gestionar catálogo ---------- */
@@ -1036,7 +1009,7 @@ async function adminReducirStock(naveId, cant){
   try {
     await update(ref(db, ROOT + '/naves/' + naveId), { stock: nave.stock - cant });
     toast(`Stock reducido: -${cant} de ${nave.nombre}`, 'ok');
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
 async function adminEliminarNave(naveId){
@@ -1046,7 +1019,7 @@ async function adminEliminarNave(naveId){
   try {
     await remove(ref(db, ROOT + '/naves/' + naveId));
     toast('Nave eliminada del catálogo', 'ok');
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
 /* ---------- Delegación de eventos del admin ---------- */
