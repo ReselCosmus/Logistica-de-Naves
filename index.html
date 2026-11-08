@@ -8,7 +8,7 @@
   :root{
     --fondo:#070b14; --panel:#0f172a; --borde:#1e3a5f;
     --acento:#38bdf8; --texto:#e2e8f0; --suave:#94a3b8;
-    --ok:#34d399; --error:#f87171; --oro:#fbbf24;
+    --ok:#34d399; --error:#f87171; --oro:#fbbf24; --violeta:#a855f7;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -80,6 +80,11 @@
     background:linear-gradient(135deg,#fbbf24,#f59e0b);
     padding:5px 11px;border-radius:20px;
   }
+  .badge-empresa{
+    font-size:.72rem;font-weight:800;letter-spacing:.5px;color:#fff;
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    padding:5px 11px;border-radius:20px;
+  }
 
   .contenedor{max-width:1250px;margin:0 auto;padding:24px 18px 80px;display:flex;flex-direction:column;gap:22px}
   .panel{background:linear-gradient(160deg,#0d182b,#0a1220);border:1px solid var(--borde);border-radius:14px;padding:20px}
@@ -87,6 +92,22 @@
 
   .grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px;align-items:end}
   .grid-form .full{grid-column:1/-1}
+
+  /* ---------- FILTROS ---------- */
+  .filtros-cat{
+    display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding-bottom:16px;
+    border-bottom:1px solid var(--borde);
+  }
+  .filtro-btn{
+    background:#0a1424;border:1px solid var(--borde);color:var(--suave);
+    padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.76rem;
+    font-weight:700;transition:.2s;font-family:inherit;white-space:nowrap;
+  }
+  .filtro-btn:hover{border-color:var(--acento);color:var(--texto)}
+  .filtro-btn.activo{
+    background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+    border-color:transparent;color:#fff;
+  }
 
   .barra-catalogo{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:16px}
   .barra-catalogo h3{margin:0}
@@ -119,6 +140,51 @@
   .compra-row .btn{flex:1}
   .propio{font-size:.7rem;color:var(--acento);font-weight:700;margin-top:8px;text-align:center}
 
+  /* ---------- CARRUSEL DE ANUNCIOS ---------- */
+  .carrusel{position:relative;min-height:200px}
+  .ad-card{
+    display:flex;gap:0;
+    background:linear-gradient(160deg,#0d182b,#0a1220);
+    border:1px solid var(--borde);border-radius:14px;overflow:hidden;
+    min-height:200px;position:relative;
+  }
+  .ad-img{
+    width:340px;min-height:200px;object-fit:cover;flex-shrink:0;
+    background:#060b14;display:block;
+  }
+  .ad-info{
+    padding:22px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;
+  }
+  .ad-info h4{font-size:1.2rem;color:#f1f5f9;line-height:1.3}
+  .ad-info p{font-size:.9rem;color:#a7b6c9;line-height:1.5}
+  .ad-empresa{font-size:.76rem;color:var(--suave);margin-top:6px;font-weight:700}
+  .ad-del{position:absolute;top:10px;right:10px;z-index:2}
+  .ad-controls{
+    display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px;
+  }
+  .ad-prev,.ad-next{
+    background:#132238;border:1px solid var(--borde);color:var(--texto);
+    width:36px;height:36px;border-radius:50%;cursor:pointer;
+    font-size:1.2rem;font-weight:700;display:flex;align-items:center;
+    justify-content:center;transition:.2s;font-family:inherit;
+  }
+  .ad-prev:hover,.ad-next:hover{background:#1b3050;border-color:var(--acento)}
+  .ad-dots{display:flex;gap:6px;align-items:center}
+  .dot{
+    width:10px;height:10px;border-radius:50%;background:#1e3a5f;
+    cursor:pointer;transition:.2s;
+  }
+  .dot.activo{background:var(--acento);width:24px;border-radius:5px}
+
+  @media (max-width: 640px){
+    .ad-card{flex-direction:column}
+    .ad-img{width:100%;min-height:150px;max-height:190px}
+    .ad-info{padding:16px}
+    .ad-info h4{font-size:1rem}
+    .ad-info p{font-size:.82rem}
+  }
+
+  /* ---------- INVENTARIO ---------- */
   .inv-grupo{margin-bottom:18px}
   .inv-grupo:last-child{margin-bottom:0}
   .inv-grupo h4{
@@ -142,6 +208,7 @@
 
   .vacio{text-align:center;color:var(--suave);padding:34px 10px;font-size:.9rem}
 
+  /* ---------- ADMIN ---------- */
   .admin-desc{font-size:.82rem;color:var(--suave);margin-bottom:14px;line-height:1.5}
   .admin-desc b{color:var(--oro)}
   .admin-resumen{
@@ -156,8 +223,7 @@
   .usuario-item{
     display:flex;flex-wrap:wrap;gap:12px;align-items:center;
     background:#0a1424;border:1px solid var(--borde);
-    border-radius:10px;padding:12px 14px;margin-bottom:10px;
-    transition:.2s;
+    border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:.2s;
   }
   .usuario-item:hover{border-color:var(--acento)}
   .usuario-info{flex:1;min-width:180px}
@@ -175,10 +241,8 @@
   .usuario-add .btn{padding:7px 9px;font-size:.73rem}
 
   .usuario-inv{
-    padding:12px 14px;background:#071018;
-    border:1px solid #16273f;border-top:0;
-    border-radius:0 0 10px 10px;
-    margin-top:-4px;margin-bottom:10px;
+    padding:12px 14px;background:#071018;border:1px solid #16273f;
+    border-top:0;border-radius:0 0 10px 10px;margin-top:-4px;margin-bottom:10px;
   }
   .usuario-inv .inv-item{margin-bottom:6px;padding:8px}
   .usuario-inv .inv-item:last-child{margin-bottom:0}
@@ -191,7 +255,9 @@
   }
   .admin-catalogo-item:hover{border-color:var(--acento)}
   .admin-cat-info{flex:1;min-width:180px}
+  .admin-cat-img{width:70px;height:52px;object-fit:cover;border-radius:6px;background:#060b14;flex-shrink:0}
 
+  /* ---------- TOAST ---------- */
   .toast{
     position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);
     background:#0f172a;border:1px solid var(--acento);color:var(--texto);
@@ -206,6 +272,7 @@
 </head>
 <body>
 
+<!-- ==================== AUTH ==================== -->
 <div id="pantallaAuth" class="auth-wrap">
   <div class="auth-card">
     <h1 class="logo">🚀 LOGÍSTICA<span>DE NAVES</span></h1>
@@ -237,17 +304,26 @@
       <label>Repetir contraseña
         <input id="regClave2" type="password" required placeholder="repítela">
       </label>
+      <label>Tipo de cuenta *
+        <select id="regTipo" required>
+          <option value="usuario">🛒 Usuario (comprador)</option>
+          <option value="empresa">🏭 Empresa (vendedor)</option>
+        </select>
+      </label>
+      <p id="hintTipo" style="font-size:.72rem;color:var(--suave);text-align:left;margin-top:-4px"></p>
       <button class="btn primario" type="submit">Crear cuenta</button>
       <p id="msgRegistro" class="msg"></p>
     </form>
   </div>
 </div>
 
+<!-- ==================== APP ==================== -->
 <div id="pantallaApp" class="oculto">
   <header class="topbar">
     <h2>🚀 LOGÍSTICA DE NAVES</h2>
     <div class="topbar-der">
       <span class="badge-admin oculto" id="badgeAdmin">👑 ADMINISTRADOR</span>
+      <span class="badge-empresa oculto" id="badgeEmpresa">🏭 EMPRESA</span>
       <span class="saldo" id="saldoUsuario">💰 0 cr</span>
       <span class="usuario">👤 <b id="nombreUsuario"></b></span>
       <button class="btn mini peligro" id="btnSalir" type="button">Salir</button>
@@ -255,6 +331,8 @@
   </header>
 
   <main class="contenedor">
+
+    <!-- ADMIN -->
     <section id="seccionAdmin" class="oculto">
       <div class="panel">
         <h3>👑 Gestión de usuarios y créditos</h3>
@@ -274,9 +352,18 @@
         </p>
         <div id="listaCatalogoAdmin"></div>
       </div>
+
+      <div class="panel">
+        <h3>📢 Gestión de anuncios</h3>
+        <p class="admin-desc">
+          Elimina cualquier anuncio del carrusel principal si es inapropiado.
+        </p>
+        <div id="listaAnunciosAdmin"></div>
+      </div>
     </section>
 
-    <section id="seccionFormNave" class="panel">
+    <!-- FORM NAVE (solo empresa) -->
+    <section id="seccionFormNave" class="panel oculto">
       <h3>➕ Añadir nave al catálogo</h3>
       <form id="formNave" class="grid-form">
         <label>Nombre de la nave *
@@ -290,6 +377,9 @@
             <option value="Fragata">Fragata</option>
             <option value="Crucero ligero">Crucero ligero</option>
             <option value="Crucero pesado">Crucero pesado</option>
+            <option value="Carguero ligero">Carguero ligero</option>
+            <option value="Carguero mediano">Carguero mediano</option>
+            <option value="Carguero grande">Carguero grande</option>
           </select>
         </label>
         <label>Precio (créditos) *
@@ -302,7 +392,7 @@
           <input id="naveEmpresa" type="text" required maxlength="60" placeholder="Ej: Astilleros Orión">
         </label>
         <label>URL de la imagen *
-          <input id="naveImagen" type="text" required placeholder="https://... (link de Google Imágenes)">
+          <input id="naveImagen" type="text" required placeholder="https://...">
         </label>
         <label class="full">Descripción *
           <textarea id="naveDescripcion" rows="3" required maxlength="600"
@@ -313,20 +403,49 @@
       </form>
     </section>
 
-    <section id="seccionCatalogo" class="panel">
+    <!-- FORM ANUNCIO (solo empresa) -->
+    <section id="seccionFormAnuncio" class="panel oculto">
+      <h3>📢 Crear anuncio para el carrusel</h3>
+      <form id="formAnuncio" class="grid-form">
+        <label>Título del anuncio *
+          <input id="adTitulo" type="text" required maxlength="60" placeholder="Ej: ¡Oferta estelar!">
+        </label>
+        <label>URL de la imagen *
+          <input id="adImagen" type="text" required placeholder="https://...">
+        </label>
+        <label class="full">Texto del anuncio *
+          <textarea id="adTexto" rows="2" required maxlength="300"
+            placeholder="Promociona tus naves con un mensaje llamativo..."></textarea>
+        </label>
+        <button class="btn primario full" type="submit">Publicar anuncio</button>
+        <p id="msgAnuncio" class="msg full"></p>
+      </form>
+    </section>
+
+    <!-- CARRUSEL DE ANUNCIOS -->
+    <section id="seccionAnuncios" class="panel oculto">
+      <h3>📢 Anuncios destacados</h3>
+      <div id="carrusel" class="carrusel"></div>
+    </section>
+
+    <!-- CATÁLOGO -->
+    <section id="seccionCatalogo" class="panel oculto">
       <div class="barra-catalogo">
         <h3>🛰 Catálogo de naves (<span id="contador">0</span>)</h3>
         <input id="buscador" type="search" placeholder="🔍 Buscar por nombre, empresa o categoría...">
       </div>
+      <div id="filtrosCategoria" class="filtros-cat"></div>
       <div id="gridNaves" class="grid-naves"></div>
-      <p id="vacio" class="vacio oculto">Todavía no hay naves publicadas. ¡Añade la primera! 🚀</p>
+      <p id="vacio" class="vacio oculto">No hay naves que coincidan con tu búsqueda.</p>
     </section>
 
-    <section id="seccionInventario" class="panel">
+    <!-- INVENTARIO -->
+    <section id="seccionInventario" class="panel oculto">
       <h3>🎒 Mi inventario <span id="invContador" style="color:var(--suave);font-weight:400"></span></h3>
       <div id="inventario"></div>
       <p id="invVacio" class="vacio">No has comprado ninguna nave todavía. ¡Ve al catálogo y compra algo! 🛒</p>
     </section>
+
   </main>
 </div>
 
@@ -337,7 +456,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, onValue, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 /* ============================================================
-   Configuración de Firebase (tu proyecto: sistema-de-naves)
+   Configuración de Firebase
    ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyBku87Qup7bMmBiIz5xMDr_xTlFz1weG4A",
@@ -350,16 +469,9 @@ const firebaseConfig = {
 };
 
 /* ============================================================
-   ⚙️  CONFIGURACIÓN INTERNA
-   ------------------------------------------------------------
-   Las credenciales del administrador están ofuscadas con XOR.
-   NO son texto plano, así que no se ven con "Ver código fuente".
-   → Usuario:     ComandanteNexus
-   → Contraseña:  Estelar#2024Nx!
-   
-   ⚠️ Esto NO es seguridad criptográfica real (cualquiera con
-   conocimientos puede decodificarlo en la consola). Si algún
-   día necesitas seguridad de verdad, migra a Firebase Auth.
+   Admin ofuscado (XOR)
+   → Usuario:    ComandanteNexus
+   → Contraseña: Estelar#2024Nx!
    ============================================================ */
 const _K = 7;
 const _AU = [68,104,106,102,105,99,102,105,115,98,73,98,127,114,116];
@@ -368,7 +480,10 @@ const ADMIN_USER = String.fromCharCode(..._AU.map(c => c ^ _K));
 const ADMIN_PASS = String.fromCharCode(..._AP.map(c => c ^ _K));
 
 const DINERO_INICIAL = 0;
-const CATEGORIAS = ['Caza','Corbeta','Fragata','Crucero ligero','Crucero pesado'];
+const CATEGORIAS = [
+  'Caza','Corbeta','Fragata','Crucero ligero','Crucero pesado',
+  'Carguero ligero','Carguero mediano','Carguero grande'
+];
 const ROOT = 'logistica_naves';
 
 const app = initializeApp(firebaseConfig);
@@ -378,12 +493,17 @@ const $ = id => document.getElementById(id);
 
 let usuariosDB = {};
 let navesDB = {};
+let adsDB = {};
 let usuariosListos = false;
 let navesListos = false;
+let adsListos = false;
 let usuarioActual = null;
+let filtroCategoria = 'todas';
+let adActual = 0;
+let carruselTimer = null;
 const invAbiertos = new Set();
 
-const todoListo = () => usuariosListos && navesListos;
+const todoListo = () => usuariosListos && navesListos && adsListos;
 const fechaISO = () => new Date().toISOString();
 const fmtNum = n => new Intl.NumberFormat('es-ES').format(Number(n) || 0);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
@@ -416,12 +536,19 @@ function msg(el, texto, tipo){
   el.className = 'msg' + (tipo ? ' ' + tipo : '');
 }
 
-/* ---------- Suscripciones en tiempo real ---------- */
+function puedePublicarNaves(){
+  if (!usuarioActual || usuarioActual === ADMIN_USER) return false;
+  const u = usuariosDB[usuarioActual];
+  return !!(u && u.tipo === 'empresa');
+}
+
+/* ============================================================
+   SUSCRIPCIONES EN TIEMPO REAL
+   ============================================================ */
 onValue(ref(db, ROOT + '/usuarios'), snap => {
   usuariosDB = snap.val() || {};
   usuariosListos = true;
 
-  // Crear admin si no existe (usa las credenciales ofuscadas)
   if (!usuariosDB[ADMIN_USER]) {
     set(ref(db, ROOT + '/usuarios/' + ADMIN_USER), {
       usuario: ADMIN_USER,
@@ -443,6 +570,12 @@ onValue(ref(db, ROOT + '/naves'), snap => {
   if (usuarioActual) renderTodo();
 });
 
+onValue(ref(db, ROOT + '/anuncios'), snap => {
+  adsDB = snap.val() || {};
+  adsListos = true;
+  if (usuarioActual) renderTodo();
+});
+
 function actualizarSubtitulo(){
   const sub = $('subtituloAuth');
   if (!sub) return;
@@ -451,7 +584,9 @@ function actualizarSubtitulo(){
     : 'Conectando con el servidor…';
 }
 
-/* ---------- Pestañas ---------- */
+/* ============================================================
+   PESTAÑAS LOGIN / REGISTRO
+   ============================================================ */
 function mostrarTab(cual){
   const esLogin = (cual === 'login');
   $('tabLogin').classList.toggle('activo', esLogin);
@@ -462,12 +597,24 @@ function mostrarTab(cual){
 $('tabLogin').addEventListener('click', () => mostrarTab('login'));
 $('tabRegistro').addEventListener('click', () => mostrarTab('registro'));
 
-/* ---------- Registro ---------- */
+function actualizarHintTipo(){
+  const tipo = $('regTipo').value;
+  $('hintTipo').textContent = tipo === 'empresa'
+    ? '🏭 Podrás publicar naves en el catálogo y crear anuncios.'
+    : '🛒 Podrás comprar naves del catálogo y ver tu inventario.';
+}
+$('regTipo').addEventListener('change', actualizarHintTipo);
+actualizarHintTipo();
+
+/* ============================================================
+   REGISTRO
+   ============================================================ */
 $('formRegistro').addEventListener('submit', async function(e){
   e.preventDefault();
   const u  = $('regUsuario').value.trim();
   const c1 = $('regClave').value;
   const c2 = $('regClave2').value;
+  const tipo = $('regTipo').value;
   const out = $('msgRegistro');
 
   if (!todoListo()) return msg(out, 'Conectando con el servidor, espera un momento…', 'error');
@@ -486,22 +633,28 @@ $('formRegistro').addEventListener('submit', async function(e){
       clave: hash(c1),
       dinero: DINERO_INICIAL,
       inventario: {},
+      tipo: tipo,
       creado: fechaISO()
     });
-    msg(out, '✅ Cuenta creada. Un administrador debe asignarte créditos para empezar.', 'ok');
+    msg(out, tipo === 'empresa'
+      ? '✅ Cuenta de empresa creada. Un administrador debe asignarte créditos para empezar a vender.'
+      : '✅ Cuenta creada. Un administrador debe asignarte créditos para empezar a comprar.', 'ok');
     $('formRegistro').reset();
+    actualizarHintTipo();
     setTimeout(() => {
       mostrarTab('login');
       $('loginUsuario').value = u;
       $('loginClave').focus();
       msg(out, '');
-    }, 1600);
+    }, 1800);
   } catch (err) {
     msg(out, '❌ Error al crear cuenta: ' + err.message, 'error');
   }
 });
 
-/* ---------- Login ---------- */
+/* ============================================================
+   LOGIN
+   ============================================================ */
 $('formLogin').addEventListener('submit', function(e){
   e.preventDefault();
   const u = $('loginUsuario').value.trim();
@@ -524,11 +677,25 @@ function iniciarSesion(usuario){
   $('nombreUsuario').textContent = usuario;
 
   const admin = (usuario === ADMIN_USER);
+  const u = usuariosDB[usuario];
+
+  // Migración legacy: usuarios sin `tipo` que ya publicaron naves → empresa
+  if (!admin && u && !u.tipo) {
+    const tieneNaves = Object.values(navesDB || {}).some(n => n.vendedor === usuario);
+    u.tipo = tieneNaves ? 'empresa' : 'usuario';
+    update(ref(db, ROOT + '/usuarios/' + usuario), { tipo: u.tipo }).catch(console.error);
+  }
+
+  const empresa = puedePublicarNaves();
+
   $('seccionAdmin').classList.toggle('oculto', !admin);
-  $('seccionFormNave').classList.toggle('oculto', admin);
+  $('seccionAnuncios').classList.toggle('oculto', admin);
+  $('seccionFormNave').classList.toggle('oculto', !empresa);
+  $('seccionFormAnuncio').classList.toggle('oculto', !empresa);
   $('seccionCatalogo').classList.toggle('oculto', admin);
   $('seccionInventario').classList.toggle('oculto', admin);
   $('badgeAdmin').classList.toggle('oculto', !admin);
+  $('badgeEmpresa').classList.toggle('oculto', !empresa);
   $('saldoUsuario').classList.toggle('oculto', admin);
 
   $('formLogin').reset();
@@ -543,13 +710,22 @@ function cerrarSesion(){
   mostrarTab('login');
   $('loginClave').value = '';
   $('buscador').value = '';
+  filtroCategoria = 'todas';
+  clearInterval(carruselTimer);
+  carruselTimer = null;
 }
 $('btnSalir').addEventListener('click', cerrarSesion);
 
-/* ---------- Añadir nave ---------- */
+/* ============================================================
+   AÑADIR NAVE (solo empresa)
+   ============================================================ */
 $('formNave').addEventListener('submit', async function(e){
   e.preventDefault();
   const out = $('msgNave');
+
+  if (!puedePublicarNaves())
+    return msg(out, 'Solo las cuentas de empresa pueden publicar naves.', 'error');
+
   const nave = {
     id: 'n_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
     nombre: $('naveNombre').value.trim(),
@@ -578,7 +754,41 @@ $('formNave').addEventListener('submit', async function(e){
   }
 });
 
-/* ---------- Comprar ---------- */
+/* ============================================================
+   AÑADIR ANUNCIO (solo empresa)
+   ============================================================ */
+$('formAnuncio').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const out = $('msgAnuncio');
+
+  if (!puedePublicarNaves())
+    return msg(out, 'Solo las cuentas de empresa pueden crear anuncios.', 'error');
+
+  const ad = {
+    id: 'a_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    titulo: $('adTitulo').value.trim(),
+    texto: $('adTexto').value.trim(),
+    imagen: $('adImagen').value.trim(),
+    empresa: usuarioActual,
+    creado: fechaISO()
+  };
+
+  if (!ad.titulo || !ad.texto || !ad.imagen)
+    return msg(out, 'Completa todos los campos.', 'error');
+
+  try {
+    await set(ref(db, ROOT + '/anuncios/' + ad.id), ad);
+    $('formAnuncio').reset();
+    msg(out, '✅ Anuncio publicado en el carrusel.', 'ok');
+    setTimeout(() => msg(out, ''), 4000);
+  } catch (err) {
+    msg(out, '❌ Error al publicar anuncio: ' + err.message, 'error');
+  }
+});
+
+/* ============================================================
+   COMPRAR
+   ============================================================ */
 async function comprar(naveId, cantidad){
   cantidad = Math.floor(Number(cantidad));
   if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
@@ -635,43 +845,9 @@ async function comprar(naveId, cantidad){
   }
 }
 
-/* ---------- Vender ---------- */
-async function venderItem(invId, cantidad){
-  cantidad = Math.floor(Number(cantidad));
-  if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
-
-  const u = usuariosDB[usuarioActual];
-  if (!u) return;
-  const item = (u.inventario || {})[invId];
-  if (!item) return toast('No tienes esa nave', 'error');
-  if (cantidad > item.cantidad) return toast('No tienes esa cantidad', 'error');
-
-  const total = item.precio * cantidad;
-  const updates = {};
-
-  updates[ROOT + '/usuarios/' + usuarioActual + '/dinero'] = (u.dinero || 0) + total;
-
-  const nuevaCant = item.cantidad - cantidad;
-  if (nuevaCant <= 0) {
-    updates[ROOT + '/usuarios/' + usuarioActual + '/inventario/' + invId] = null;
-  } else {
-    updates[ROOT + '/usuarios/' + usuarioActual + '/inventario/' + invId + '/cantidad'] = nuevaCant;
-  }
-
-  const nave = navesDB[item.naveId];
-  if (nave) {
-    updates[ROOT + '/naves/' + item.naveId + '/stock'] = (nave.stock || 0) + cantidad;
-  }
-
-  try {
-    await update(ref(db), updates);
-    toast(`💸 Vendiste ${cantidad} × ${item.nombre} por ${fmtNum(total)} cr`, 'ok');
-  } catch (err) {
-    toast('❌ Error al vender: ' + err.message, 'error');
-  }
-}
-
-/* ---------- Descartar ---------- */
+/* ============================================================
+   DESCARTAR (eliminar del inventario sin reembolso)
+   ============================================================ */
 async function descartarItem(invId, cantidad){
   cantidad = Math.floor(Number(cantidad));
   if (!(cantidad >= 1)) return toast('Cantidad inválida', 'error');
@@ -682,7 +858,7 @@ async function descartarItem(invId, cantidad){
   if (!item) return toast('No tienes esa nave', 'error');
   if (cantidad > item.cantidad) return toast('No tienes esa cantidad', 'error');
 
-  if (!confirm(`¿Eliminar ${cantidad} × ${item.nombre} de tu inventario?\n\n⚠️ No recuperarás créditos ni stock.`)) return;
+  if (!confirm(`¿Eliminar ${cantidad} × ${item.nombre} de tu inventario?\n\n⚠️ No recuperarás créditos.`)) return;
 
   try {
     const nuevaCant = item.cantidad - cantidad;
@@ -697,10 +873,19 @@ async function descartarItem(invId, cantidad){
   }
 }
 
-/* ---------- Render general ---------- */
+/* ============================================================
+   RENDER GENERAL
+   ============================================================ */
 function renderTodo(){
-  if (usuarioActual === ADMIN_USER) renderAdmin();
-  else { renderSaldo(); renderNaves(); renderInventario(); }
+  if (usuarioActual === ADMIN_USER) {
+    renderAdmin();
+  } else {
+    renderSaldo();
+    renderFiltros();
+    renderCarrusel();
+    renderNaves();
+    renderInventario();
+  }
 }
 
 function renderSaldo(){
@@ -708,28 +893,136 @@ function renderSaldo(){
   $('saldoUsuario').textContent = '💰 ' + fmtNum(u ? u.dinero : 0) + ' cr';
 }
 
-/* ---------- Catálogo ---------- */
+/* ============================================================
+   CARRUSEL DE ANUNCIOS
+   ============================================================ */
+function renderCarrusel(){
+  const wrap = $('seccionAnuncios');
+  const cont = $('carrusel');
+  const ads = Object.values(adsDB || {}).sort((a, b) => new Date(b.creado) - new Date(a.creado));
+
+  if (!ads.length) {
+    wrap.classList.add('oculto');
+    clearInterval(carruselTimer);
+    carruselTimer = null;
+    return;
+  }
+  wrap.classList.remove('oculto');
+
+  if (adActual >= ads.length) adActual = 0;
+  const ad = ads[adActual];
+  const esMio = (ad.empresa === usuarioActual);
+
+  cont.innerHTML = `
+    <div class="ad-card">
+      <img src="${esc(ad.imagen)}" alt="" class="ad-img">
+      <div class="ad-info">
+        <h4>${esc(ad.titulo)}</h4>
+        <p>${esc(ad.texto)}</p>
+        <span class="ad-empresa">🏭 ${esc(ad.empresa)}</span>
+      </div>
+      ${esMio ? `<button class="btn peligro mini ad-del" data-del-ad="${esc(ad.id)}" title="Eliminar anuncio">🗑</button>` : ''}
+    </div>
+    ${ads.length > 1 ? `
+      <div class="ad-controls">
+        <button class="ad-prev" type="button">‹</button>
+        <div class="ad-dots">
+          ${ads.map((_, i) => `<span class="dot ${i === adActual ? 'activo' : ''}" data-idx="${i}"></span>`).join('')}
+        </div>
+        <button class="ad-next" type="button">›</button>
+      </div>
+    ` : ''}
+  `;
+
+  const img = cont.querySelector('.ad-img');
+  if (img) img.addEventListener('error', () => { img.src = PLACEHOLDER; }, { once: true });
+
+  const prev = cont.querySelector('.ad-prev');
+  const next = cont.querySelector('.ad-next');
+  if (prev) prev.onclick = () => {
+    adActual = (adActual - 1 + ads.length) % ads.length;
+    renderCarrusel();
+  };
+  if (next) next.onclick = () => {
+    adActual = (adActual + 1) % ads.length;
+    renderCarrusel();
+  };
+  cont.querySelectorAll('.dot').forEach(d => {
+    d.onclick = () => {
+      adActual = Number(d.dataset.idx);
+      renderCarrusel();
+    };
+  });
+
+  const delBtn = cont.querySelector('[data-del-ad]');
+  if (delBtn) delBtn.onclick = async () => {
+    if (!confirm('¿Eliminar este anuncio?')) return;
+    try {
+      await remove(ref(db, ROOT + '/anuncios/' + delBtn.dataset.delAd));
+      toast('Anuncio eliminado', 'ok');
+    } catch (err) { toast('❌ ' + err.message, 'error'); }
+  };
+
+  clearInterval(carruselTimer);
+  if (ads.length > 1) {
+    carruselTimer = setInterval(() => {
+      adActual = (adActual + 1) % ads.length;
+      renderCarrusel();
+    }, 6000);
+  } else {
+    carruselTimer = null;
+  }
+}
+
+/* ============================================================
+   FILTROS DE CATEGORÍA
+   ============================================================ */
+function renderFiltros(){
+  const cont = $('filtrosCategoria');
+  const todas = ['todas', ...CATEGORIAS];
+  cont.innerHTML = todas.map(cat => `
+    <button class="filtro-btn ${filtroCategoria === cat ? 'activo' : ''}" data-cat="${esc(cat)}" type="button">
+      ${cat === 'todas' ? '🌌 Todas' : esc(cat)}
+    </button>
+  `).join('');
+}
+
+$('filtrosCategoria').addEventListener('click', e => {
+  const btn = e.target.closest('[data-cat]');
+  if (!btn) return;
+  filtroCategoria = btn.getAttribute('data-cat');
+  renderFiltros();
+  renderNaves();
+});
+
+/* ============================================================
+   CATÁLOGO
+   ============================================================ */
 function renderNaves(){
   const grid = $('gridNaves');
-  const filtro = $('buscador').value.trim().toLowerCase();
+  const filtroTexto = $('buscador').value.trim().toLowerCase();
 
   let naves = Object.values(navesDB || {});
-  $('contador').textContent = naves.length;
 
-  if (filtro){
+  if (filtroCategoria !== 'todas') {
+    naves = naves.filter(n => n.categoria === filtroCategoria);
+  }
+  if (filtroTexto) {
     naves = naves.filter(n =>
-      n.nombre.toLowerCase().includes(filtro) ||
-      n.empresa.toLowerCase().includes(filtro) ||
-      n.categoria.toLowerCase().includes(filtro)
+      n.nombre.toLowerCase().includes(filtroTexto) ||
+      n.empresa.toLowerCase().includes(filtroTexto) ||
+      n.categoria.toLowerCase().includes(filtroTexto)
     );
   }
 
+  $('contador').textContent = naves.length;
   $('vacio').classList.toggle('oculto', naves.length > 0);
+
   const miSaldo = (usuariosDB[usuarioActual] || {}).dinero || 0;
 
   grid.innerHTML = naves.map(n => {
     const agotado = Number(n.stock) <= 0;
-    const propio  = (n.vendedor === usuarioActual);
+    const propio = (n.vendedor === usuarioActual);
     const sinDinero = miSaldo < n.precio;
     const puede = !agotado && !propio && !sinDinero;
 
@@ -795,7 +1088,9 @@ $('gridNaves').addEventListener('click', e => {
 
 $('buscador').addEventListener('input', renderNaves);
 
-/* ---------- Mi inventario ---------- */
+/* ============================================================
+   INVENTARIO (sin vender, solo eliminar)
+   ============================================================ */
 function renderInventario(){
   const cont = $('inventario');
   const u = usuariosDB[usuarioActual];
@@ -834,7 +1129,6 @@ function renderInventario(){
         </div>
         <div class="inv-acciones">
           <input type="number" class="cant-input" min="1" max="${it.cantidad}" value="1">
-          <button class="btn oro mini" data-vender="${esc(it.id)}">💸 Vender</button>
           <button class="btn peligro mini" data-descartar="${esc(it.id)}" title="Eliminar sin recuperar créditos">🗑</button>
         </div>
       </div>
@@ -856,27 +1150,31 @@ $('inventario').addEventListener('click', e => {
   const row = e.target.closest('.inv-item');
   if (!row) return;
   const input = row.querySelector('.cant-input');
-  const v = e.target.closest('[data-vender]');
   const d = e.target.closest('[data-descartar]');
-  if (v) venderItem(v.getAttribute('data-vender'), input ? input.value : 1);
-  else if (d) descartarItem(d.getAttribute('data-descartar'), input ? input.value : 1);
+  if (d) descartarItem(d.getAttribute('data-descartar'), input ? input.value : 1);
 });
 
-/* ---------- Panel administrador ---------- */
+/* ============================================================
+   PANEL ADMIN
+   ============================================================ */
 function renderAdmin(){
   const otros = Object.values(usuariosDB || {})
     .filter(u => u.usuario !== ADMIN_USER)
     .sort((a, b) => a.usuario.localeCompare(b.usuario));
 
   const totalDinero = otros.reduce((s, u) => s + (u.dinero || 0), 0);
+  const totalEmpresas = otros.filter(u => u.tipo === 'empresa').length;
+  const totalUsuarios = otros.length - totalEmpresas;
+
   $('adminResumen').innerHTML = `
-    <span>👥 Usuarios registrados: <b>${otros.length}</b></span>
+    <span>👥 Usuarios: <b>${totalUsuarios}</b></span>
+    <span>🏭 Empresas: <b>${totalEmpresas}</b></span>
     <span>💰 Créditos en circulación: <b>${fmtNum(totalDinero)} cr</b></span>
   `;
 
   const cont = $('listaUsuarios');
   if (!otros.length){
-    cont.innerHTML = '<p class="vacio">No hay usuarios registrados todavía.<br>Los nuevos registros aparecerán aquí automáticamente en tiempo real.</p>';
+    cont.innerHTML = '<p class="vacio">No hay usuarios registrados todavía.</p>';
   } else {
     cont.innerHTML = otros.map(u => {
       const inv = u.inventario || {};
@@ -884,6 +1182,9 @@ function renderAdmin(){
       const unidades = invArr.reduce((s, i) => s + (i.cantidad || 0), 0);
       const fechaReg = u.creado ? new Date(u.creado).toLocaleDateString('es-ES') : '—';
       const abierto = invAbiertos.has(u.usuario);
+      const tipoLabel = u.tipo === 'empresa'
+        ? '<span style="color:var(--violeta);font-weight:800">🏭 Empresa</span>'
+        : '<span style="color:var(--suave)">🛒 Usuario</span>';
 
       const invHTML = invArr.length
         ? invArr.map(it => `
@@ -908,7 +1209,7 @@ function renderAdmin(){
       return `
         <div class="usuario-item">
           <div class="usuario-info">
-            <div class="usuario-nombre">👤 ${esc(u.usuario)}</div>
+            <div class="usuario-nombre">👤 ${esc(u.usuario)} ${tipoLabel}</div>
             <div class="usuario-meta">Registrado: ${fechaReg} · Inventario: ${unidades} nave${unidades === 1 ? '' : 's'}</div>
           </div>
           <div class="usuario-saldo">💰 ${fmtNum(u.dinero || 0)} cr</div>
@@ -928,6 +1229,7 @@ function renderAdmin(){
     }).join('');
   }
 
+  // Catálogo
   const naves = Object.values(navesDB || {});
   const catCont = $('listaCatalogoAdmin');
   if (!naves.length){
@@ -935,6 +1237,7 @@ function renderAdmin(){
   } else {
     catCont.innerHTML = naves.map(n => `
       <div class="admin-catalogo-item">
+        <img src="${esc(n.imagen)}" alt="" class="admin-cat-img" loading="lazy">
         <div class="admin-cat-info">
           <div class="inv-nombre">${esc(n.nombre)}</div>
           <div class="inv-empresa">${esc(n.categoria)} · ${esc(n.empresa)} · vendedor: ${esc(n.vendedor)}</div>
@@ -949,12 +1252,32 @@ function renderAdmin(){
     `).join('');
   }
 
+  // Anuncios
+  const ads = Object.values(adsDB || {}).sort((a, b) => new Date(b.creado) - new Date(a.creado));
+  const adsCont = $('listaAnunciosAdmin');
+  if (!ads.length){
+    adsCont.innerHTML = '<p class="vacio">No hay anuncios publicados en el carrusel.</p>';
+  } else {
+    adsCont.innerHTML = ads.map(a => `
+      <div class="admin-catalogo-item">
+        <img src="${esc(a.imagen)}" alt="" class="admin-cat-img" loading="lazy">
+        <div class="admin-cat-info">
+          <div class="inv-nombre">${esc(a.titulo)}</div>
+          <div class="inv-empresa">${esc(a.texto)} · por ${esc(a.empresa)}</div>
+        </div>
+        <button class="btn peligro mini" data-delete-ad="${esc(a.id)}">🗑 Eliminar anuncio</button>
+      </div>
+    `).join('');
+  }
+
   document.querySelectorAll('#seccionAdmin img').forEach(img => {
     img.addEventListener('error', () => { img.src = PLACEHOLDER; }, { once: true });
   });
 }
 
-/* ---------- Admin: añadir / quitar créditos ---------- */
+/* ============================================================
+   ADMIN: acciones
+   ============================================================ */
 async function adminAgregar(user, cant){
   cant = Math.floor(Number(cant));
   if (!Number.isFinite(cant) || cant < 1) return toast('Cantidad inválida', 'error');
@@ -981,7 +1304,6 @@ async function adminQuitar(user, cant){
   } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
-/* ---------- Admin: eliminar del inventario ajeno ---------- */
 async function adminEliminarInv(user, invId, cant){
   cant = Math.floor(Number(cant));
   if (!(cant >= 1)) return toast('Cantidad inválida', 'error');
@@ -990,7 +1312,7 @@ async function adminEliminarInv(user, invId, cant){
   const item = (u.inventario || {})[invId];
   if (!item) return toast('Ese usuario no tiene esa nave', 'error');
   if (cant > item.cantidad) return toast(`Solo tiene ${item.cantidad} unidades`, 'error');
-  if (!confirm(`¿Eliminar ${cant} × ${item.nombre} del inventario de ${user}?\n\n⚠️ No se devuelve dinero ni stock.`)) return;
+  if (!confirm(`¿Eliminar ${cant} × ${item.nombre} del inventario de ${user}?`)) return;
   try {
     const nuevaCant = item.cantidad - cant;
     if (nuevaCant <= 0) await remove(ref(db, ROOT + '/usuarios/' + user + '/inventario/' + invId));
@@ -999,7 +1321,6 @@ async function adminEliminarInv(user, invId, cant){
   } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
-/* ---------- Admin: gestionar catálogo ---------- */
 async function adminReducirStock(naveId, cant){
   cant = Math.floor(Number(cant));
   if (!(cant >= 1)) return toast('Cantidad inválida', 'error');
@@ -1015,14 +1336,26 @@ async function adminReducirStock(naveId, cant){
 async function adminEliminarNave(naveId){
   const nave = navesDB[naveId];
   if (!nave) return toast('Nave no encontrada', 'error');
-  if (!confirm(`¿Eliminar COMPLETAMENTE "${nave.nombre}" del catálogo?\n\nLos usuarios que ya la compraron la conservan en su inventario.`)) return;
+  if (!confirm(`¿Eliminar COMPLETAMENTE "${nave.nombre}" del catálogo?`)) return;
   try {
     await remove(ref(db, ROOT + '/naves/' + naveId));
     toast('Nave eliminada del catálogo', 'ok');
   } catch (err) { toast('❌ ' + err.message, 'error'); }
 }
 
-/* ---------- Delegación de eventos del admin ---------- */
+async function adminEliminarAd(adId){
+  const ad = adsDB[adId];
+  if (!ad) return toast('Anuncio no encontrado', 'error');
+  if (!confirm(`¿Eliminar el anuncio "${ad.titulo}"?`)) return;
+  try {
+    await remove(ref(db, ROOT + '/anuncios/' + adId));
+    toast('Anuncio eliminado', 'ok');
+  } catch (err) { toast('❌ ' + err.message, 'error'); }
+}
+
+/* ============================================================
+   ADMIN: delegación de eventos
+   ============================================================ */
 $('listaUsuarios').addEventListener('click', e => {
   const bAdd = e.target.closest('[data-add]');
   const bRem = e.target.closest('[data-remove]');
@@ -1062,7 +1395,14 @@ $('listaCatalogoAdmin').addEventListener('click', e => {
   }
 });
 
-/* ---------- Arranque ---------- */
+$('listaAnunciosAdmin').addEventListener('click', e => {
+  const bDel = e.target.closest('[data-delete-ad]');
+  if (bDel) adminEliminarAd(bDel.getAttribute('data-delete-ad'));
+});
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
 mostrarTab('login');
 </script>
 </body>
